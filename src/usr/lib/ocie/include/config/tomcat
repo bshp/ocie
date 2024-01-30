@@ -1,20 +1,24 @@
 #!/bin/bash
     
 . ${OCIE_LIB}/include/config/apache;
+    
 # Tomcat specific
 if [[ -f "${OCIE_HOME}/conf/ocie-tomcat.init" ]];then
     reset_config;
 fi;
     
 APP_RUNAS="tomcat";
-IP_REGEX="${VADC_IP_ADDRESS// /|}";
-APP_PROXIES="${IP_REGEX//./\\.}";
-APP_OPTS=$(echo 'export JAVA_OPTS="'$JAVA_OPTS $APP_PARAMS'"');
-echo ${APP_OPTS} > ${CATALINA_HOME}/bin/setenv.sh;
-echo "export VADC_IP_REG=${APP_PROXIES}" >> ${CATALINA_HOME}/bin/setenv.sh;
+APP_PROXIES="$(echo ${VADC_IP_ADDRESS// /|} | sed 's/\./\\./g' | sed 's|\/|\\/|g')";
+    
+# Add environment variables to tomcat 
+echo "export JAVA_OPTS=\"${JAVA_OPTS} ${APP_PARAMS}\"" > ${CATALINA_HOME}/bin/setenv.sh
+echo "export VADC_IP_REG=\"${APP_PROXIES}\"" >> ${CATALINA_HOME}/bin/setenv.sh
 chmod -R 0755 "${CATALINA_HOME}/bin/setenv.sh";
+# Enable libapache2-mod-jk
 cp "${APACHE_MODS}/jk.conf.dist" "${APACHE_MODS}/jk.conf";
 cp "${APACHE_MODS}/jk.load.dist" "${APACHE_MODS}/jk.load";
+    
+# Ensure config is valid
 CATALINA_CFG=$(ociectl --test);
 if [[ ! -z "${CATALINA_CFG}" ]];then
     echo "Ocie Config: Tomcat config test FAILED, reverting changes";
@@ -22,6 +26,8 @@ if [[ ! -z "${CATALINA_CFG}" ]];then
     reset_config;
     exit 1;
 fi;
+    
+# Set ready
 export APP_RUNAS="${APP_RUNAS}";
 echo "#Tomcat Initialized" > ${OCIE_HOME}/conf/ocie-tomcat.init;
 echo "Ocie Config: Tomcat Config Test PASSED, using updated configuration";
