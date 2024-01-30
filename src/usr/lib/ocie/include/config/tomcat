@@ -1,5 +1,6 @@
 #!/bin/bash
     
+. ${OCIE_LIB}/include/config/apache;
 # Tomcat specific
 if [[ -f "${OCIE_HOME}/conf/ocie-tomcat.init" ]];then
     reset_config;
