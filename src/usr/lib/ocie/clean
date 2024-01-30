@@ -1,0 +1,87 @@
+#!/bin/bash
+    
+FIND_BASE=0;
+FIND_PATH="";
+FIND_PATTERN="";
+RM_DIRS="";
+RM_MULTI="";
+WHAT_IF=0;
+    
+function show_help()
+{
+   echo "Cleanup files from base setup";
+   echo
+   echo "Syntax: clean -base -path '/var/log' -pattern '*.log'";
+   echo
+   echo "Options:";
+   echo "    --base     Cleanup image, default: false";
+   echo "    --path     Path to search, default: /var/log";
+   echo "    --pattern  Comma seperated list of patterns to search, default: '*.log*,*.log.xz'";
+   echo "    --dirs     Comma seperated list of directories to forcefully delete";
+   echo "    --multi    Comma seperated list, colon delimited, formatted with '/path/to/search:pattern_to_use1,/path/to/search2:pattern_to_use2'";
+   echo "    --whatif   Don't actually delete anything, just show a what if scenario";
+}
+    
+function deleteAny()
+{
+    for i in ${FIND_PATTERN//,/ };do
+        echo "Ocie: Removing any, directory or file in: $FIND_PATH, matching pattern: $i";
+        find "$FIND_PATH" -name "$i" -exec /bin/rm {} \;
+    done;
+}
+    
+function deleteFiles()
+{
+    for i in ${FIND_PATTERN//,/ };do
+        echo "Ocie: Removing files in: $FIND_PATH, matching pattern: $i";
+        find "$FIND_PATH" -type f -name "$i" -exec /bin/rm {} \;
+    done;
+}
+    
+for cmds in "$@";do
+    shift
+    case "$cmds" in
+        '--help')
+            show_help;;
+        '--base')
+            FIND_BASE=1;;
+        '--path')
+            FIND_PATH="$1";;
+        '--pattern')
+            FIND_PATTERN=$(echo "$1" | tr -d ' ');;
+        '--dirs')
+            RM_DIRS=$(echo "$1" | tr -d ' ');;
+        '--multi')
+            RM_MULTI=$(echo "$1" | tr -d ' ');;
+        '--whatif')
+            WHAT_IF=1;;
+        *);;
+    esac;
+done;
+    
+if [[ $FIND_BASE == 1 ]];then
+    echo "Ocie: Removing files in: /var/log/*.log*, /var/lib/apt/lists/*";
+    rm -rf /var/lib/apt/lists/*;
+    rm -rf /var/log/*.log*;
+fi;
+    
+if [[ ! -z "$FIND_PATH" ]];then
+    deleteFiles "$FIND_PATH" "$FIND_PATTERN";
+fi;
+    
+# Remove directories, recursive, eeeek..
+if [[ ! -z "${RM_DIRS}" ]];then
+    for d in ${RM_DIRS//,/ };do
+        echo "Ocie: Removing directory: $d";
+        rm -rf "$d";
+    done;
+fi;
+    
+if [[ ! -z "${RM_MULTI}" ]];then
+    if [[ "${RM_MULTI}" == *":"* ]];then
+        for m in ${RM_MULTI//,/ };do
+            MULTI=${m//:/ };
+            deleteFiles ${m//:/ };
+        done;
+    fi;
+fi;

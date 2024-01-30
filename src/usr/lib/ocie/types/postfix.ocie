@@ -1,0 +1,23 @@
+#!/bin/bash
+    
+function app_shutdown()
+{
+    /usr/sbin/postfix stop;
+}
+    
+function app_reload()
+{
+    app_shutdown;
+    app_start;
+}
+    
+function app_start()
+{
+    #Start Foreground
+    /usr/sbin/postfix -c /etc/postfix start-fg;
+}
+    
+function app_test()
+{
+    echo $(/usr/sbin/postfix check)
+}

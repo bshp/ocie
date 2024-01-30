@@ -1,0 +1,45 @@
+#!/bin/bash
+    
+DH_SIZE=2048;
+DH_NAME=dhparams.pem;
+DH_PATH=/etc/ssl;
+OPENSSL_BIN=$(openssl version 2>&1 | grep -i -o 'Library: OpenSSL');
+    
+if [[ -z "${OPENSSL_BIN}" ]];then
+    echo "Ocie: Unable to generate dhparams, openssl not found";
+    exit;
+fi;
+    
+function show_help()
+{
+   echo "Creates new dhparams, writes to /etc/ssl/dhparams.pem"
+   echo
+   echo "Syntax: dhparams -size 2048";
+   echo
+   echo "Requires: The enviroment variable name";
+   echo
+   echo "Options:";
+   echo "    --size <size>    The size for dharam, default: 2048";
+   echo "    --name <name>    The name of the file to write, include the extension if needed, default: dhparams.pem";
+   echo "    --path <path>    Path to write dhparams to, default: /etc/ssl/";
+   exit 0;
+}
+    
+for cmds in "$@";do
+    shift;
+    case "$cmds" in
+        '--help')
+            show_help;;
+        '--size')
+            DH_SIZE="$1";;
+        '--name')
+            DH_NAME="$1";;
+        '--path')
+            DH_PATH="$1";;
+        *);;
+    esac;
+done;
+    
+echo "Ocie: Generating new DHE Params";
+openssl dhparam -out ${DH_PATH}/${DH_NAME} ${DH_SIZE} &>/dev/null
+echo "Ocie: Finished generating new DHE params: file:${DH_PATH}/${DH_NAME}";

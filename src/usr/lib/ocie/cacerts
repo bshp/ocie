@@ -1,0 +1,127 @@
+#!/bin/bash
+    
+IMPORT_AUTO="${CA_AUTO_UPDATE:-1}";
+IMPORT_OS="${CA_UPDATE_OS:-0}";
+IMPORT_JVM="${CA_UPDATE_JVM:-0}";
+IMPORT_PATH="";
+IMPORT_FILTER="*_CA.crt";
+CA_PATH="${IMPORT_PATH:-${CA_PATH}}";
+CA_FILTER="${IMPORT_FILTER:-${CA_FILTER}}";
+PATH_TYPE="${CA_PATH%%:*}";
+CA_PATH="${CA_PATH#*:}";
+JAVA_HOME="${JAVA_HOME:-}";
+    
+function show_help()
+{
+   echo "Update CA Certificate Stores"
+   echo
+   echo "Syntax: cacerts --os --jvm --path 'https://certs.example.com/'";
+   echo "    If neither of --os, --jvm are defined, importer will attempt both."
+   echo
+   echo "Required:"
+   echo "    --path <path>    Path to import CA Certs from, prefixed with either [ url: | file:file ],";
+   echo "                     e.g file:/opt/certs OR url:https://certs.example.com";
+   echo
+   echo "Optional:";
+   echo "    --os        Import into operating system store, /etc/ssl";
+   echo "    --jvm       Import into java store, cacerts";
+   echo "    --filter    Filter to find CA cert files by, default: *_CA.crt";
+}
+function auto_update()
+{
+    update_os;
+    update_jvm;
+}
+    
+function update_jvm()
+{
+    if [[ "${JAVA_HOME}" != "" ]];then
+        for CA_CRT in /usr/local/share/ca-certificates/*.crt; do
+            CA_NAME=$(openssl x509 -noout -subject -nameopt multiline -in $CA_CRT | sed -n 's/ *commonName *= //p');
+            CA_EXISTS=$(${JAVA_HOME}/bin/keytool -list -cacerts -storepass changeit -alias "$CA_NAME" | echo $?);
+            if [ "$CA_EXISTS" -eq 0 ];then
+                ${JAVA_HOME}/bin/keytool -import -trustcacerts -cacerts \
+                    -storepass changeit -noprompt -alias "$CA_NAME" -file $CA_CRT >/dev/null 2>&1 \
+                    | echo "Ocie: CA Import: Added certificate to cacert, $CA_CRT";
+            else 
+                echo "Ocie: CA Import: Certificate ${CA_NAME} already exists, not adding";
+            fi;
+        done;
+    else 
+        echo "Ocie: CA Import: JAVA_HOME is undefined in environment, nothing to import";
+    fi;
+}
+    
+function update_os()
+{
+    certs=$(ls /usr/local/share/ca-certificates/*.crt 2> /dev/null | wc -l);
+    if [ "${certs}" -ne 0 ];then
+        update-ca-certificates;
+    else
+        echo "Ocie: CA Import: No certificates were found to import";
+    fi;
+}
+    
+function get_certs()
+{
+    cd /usr/local/share/ca-certificates;
+    if [[ "${PATH_TYPE}" == "url" ]];then
+        wget -q -r -nH -A ${CA_FILTER} "${CA_PATH}";
+    else 
+        if [ -d "${CA_PATH}" ];then
+            cp -R ${CA_PATH}/${CA_FILTER} /usr/local/share/ca-certificates/;
+        else
+            echo "Ocie: CA Import: Unable to read ${CA_PATH} or it is not a valid directory";
+        fi;
+    fi;
+}
+    
+function cleanup()
+{
+    cd /usr/local/share/ca-certificates;
+    rm -rf /usr/local/share/ca-certificates/*;
+}
+    
+for cmds in "$@";do
+    shift;
+    case "$cmds" in
+        '--help')
+            show_help;;
+        '--os')
+            IMPORT_OS=1;;
+        '--jvm')
+            IMPORT_JVM=1;;
+        '--path')
+            IMPORT_PATH="$1";;
+        '--filter')
+            IMPORT_FILTER="$1";;
+        *);;
+    esac;
+done;
+    
+#Run
+if [[ ${CA_PATH} != "" ]];then
+    if [[ ! "${PATH_TYPE}" == "file" ]] && [[ ! "${PATH_TYPE}" == "url" ]];then
+        echo "Ocie: CA Import: Unable to determine CA_PATH type, ${PATH_TYPE}, only file: or url: are valid";
+    else
+        echo "Ocie: CA Import: Starting";
+        get_certs;
+        if [[ ${IMPORT_AUTO} == 1 ]];then
+            echo "Ocie: CA Import: Auto Update is enabled";
+            auto_update;
+        else
+            if [[ ${IMPORT_OS} == 1 ]];then
+                echo "Ocie: CA Import: Updating OS CA Store";
+                update_os;
+            fi;
+            if [[ ${IMPORT_JVM} == 1 ]];then
+                echo "Ocie: CA Import: Updating JVM CA Store";
+                update_jvm;
+            fi;
+        fi;
+        cleanup;
+        echo "Ocie: CA Import: Finished";
+    fi;
+else
+    echo "Ocie: CA Import: --path | env CA_PATH is not defined, nothing to do";
+fi;

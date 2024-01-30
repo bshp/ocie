@@ -1,0 +1,110 @@
+#!/bin/bash
+set -euf;
+    
+function show_help()
+{
+   echo "OCIE System Config";
+   echo
+   echo "Syntax: ocie [--keys -size 2048 -subject localhost] [--dhparams -size 3072] [--timezone America] [--print]";
+   echo
+   echo "Parameters:";
+   echo
+   echo "--cacerts    Update CA Certificate Stores, certificates must have the .crt extension";
+   echo "    Required:"
+   echo "       -path <path> Path to import CA Certs from, prefixed with either [ url: | file:file ], default: env CERT_PATH";
+   echo "    Optional:";
+   echo "       -os Import into operating system store, /etc/ssl, default: env CERT_UPDATE_OS";
+   echo "       -jvm Import into java store, default: env CERT_UPDATE_JVM";
+   echo "       -filter Filter to find CA cert files by, default: env CERT_FILTER";
+   echo
+   echo "--dhparams    Generate new dhparams";
+   echo "    Optional:"
+   echo "      -size <size>, default: env DH_PARAM_SIZE";
+   echo "      -name <name>, default: dhparams";
+   echo "      -path <path>, default: /etc/ssl";
+   echo
+   echo "--keys    Creates new ssl private key and public certificate"
+   echo "    Optional:"
+   echo "       -size <size>, default: 2048";
+   echo "       -name <name>, default: server";
+   echo "       -path <path>, default: /etc/ssl";
+   echo "       -subject <subject>, default: localhost";
+   echo "       -valid <valid days>, default: 365";
+   echo "       -tag <tag name>, default: default.keys";
+   echo
+   echo "--pkg    Add/Remove packages"
+   echo "    Optional:"
+   echo "       -base Add default packages";
+   echo "       -upgrade  Update all packages";
+   echo "       -add <package list> Add packages, comma seperated list";
+   echo "       -remove <package list> Remove packages, comma seperated list";
+   echo
+   echo "--timezone    Set system timezone";
+   echo "    Required:"
+   echo "       -set <timezone> A valid timezone definition from zoneinfo";
+   echo "    Optional:"
+   echo "       -print Print system timezone";
+   echo
+   echo "--clean    Remove directories/files";
+   echo "    Optional:"
+   echo "       -base     Cleanup base image, default: false";
+   echo "       -path     Path to search, default: /var/log";
+   echo "       -pattern  Comma seperated list of patterns to search, default: *.log* *.log.xz";
+   echo "       -dirs     Comma seperated list of directories to forcefully delete";
+   echo
+   echo "--print    Print system config";
+}
+    
+function get_environment()
+{
+    echo "Ocie: Environment";
+    printf "%s" "$(</etc/environment)";
+    echo
+    echo "Ocie: Package Manifest";
+    $OCIE_LIB/pkg --print;
+}
+    
+function format_args()
+{
+    RESULT=$(echo "$1" | sed -e 's/ -/ --/g');
+    echo "$RESULT";
+}
+    
+ENTRIES=();
+for i in "$@";do
+    shift
+    case "$i" in
+        '--pkg') 
+            ENTRIES+=(["0"]="pkg $(format_args " $1")");;
+        '--cacerts') 
+            ENTRIES+=(["1"]="cacerts $(format_args " $1")");;
+        '--dhparams') 
+            ENTRIES+=(["2"]="dhparams $(format_args " $1")");;
+        '--keys') 
+            ENTRIES+=(["3"]="keys $(format_args " $1")");;
+        '--timezone') 
+            ENTRIES+=(["4"]="timezone $(format_args " $1")");;
+        '--clean') 
+            ENTRIES+=(["5"]="clean $(format_args " $1")");;
+        '--print') 
+            ENTRIES+=(["6"]="print");;
+        '--help') 
+            show_help;;
+        *);;
+    esac;
+done;
+    
+CMDS=$(<<< ${!ENTRIES[@]} tr ' ' '\n' | sort);
+for key in $CMDS;do
+    ENTRY="$(echo ${ENTRIES[$key]})";
+    CMD="$(echo ${ENTRY%% *})";
+    PARAMS="$(echo ${ENTRY#* })";
+    if [[ -f "${OCIE_LIB}/${CMD}" ]];then
+        echo "Ocie: Executing [ $CMD ], with arguments: [ $PARAMS ]";
+        $OCIE_LIB/$CMD $PARAMS
+    elif [[ "${CMD}" == "print" ]];then
+        get_environment;
+    else
+        echo "Ocie: Uknown option passed: [ $CMD ], use --help for more info";
+    fi;
+done;

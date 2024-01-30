@@ -1,0 +1,30 @@
+#!/bin/bash
+    
+function app_shutdown()
+{
+    /usr/sbin/apachectl -k stop;
+    ${CATALINA_HOME}/bin/catalina.sh stop;
+}
+    
+function app_reload()
+{
+    app_shutdown;
+    app_start;
+}
+    
+function app_start()
+{
+   /usr/sbin/apachectl -k start;
+   su ${APP_RUNAS} -c "${CATALINA_HOME}/bin/catalina.sh run";
+}
+    
+function app_test()
+{
+    TC_TEST=$(/opt/tomcat/bin/catalina.sh configtest 2>&1);
+    CFG_TEST=$(echo "$TC_TEST" | grep 'Apache Tomcat Native' | sort -u);
+    CFG_PASS='INFO: Loaded( APR based)? Apache Tomcat Native library';
+    CFG_RESULT=$(echo "$CFG_TEST" | grep -E "$CFG_PASS");
+    if [[ -z "$CFG_RESULT" ]];then
+        echo "$TC_TEST";
+    fi;
+}

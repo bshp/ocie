@@ -1,0 +1,39 @@
+#!/bin/bash
+    
+function app_shutdown()
+{
+    su jetbrains -c "${YOUTRACK_HOME}/bin/youtrack.sh stop";
+}
+    
+function app_reload()
+{
+    su jetbrains -c "${YOUTRACK_HOME}/bin/youtrack.sh restart";
+}
+    
+function app_start()
+{
+    su jetbrains -c "${YOUTRACK_HOME}/bin/youtrack.sh run $@";
+}
+    
+function app_certs()
+{
+    ${OCIE_LIB}/cacerts;
+}
+    
+function app_config()
+{
+    CUSTOM_CSS=${YOUTRACK_HOME}/conf/custom.css;
+    STATIC_DIR=${YOUTRACK_HOME}/apps/youtrack/web/static/simplified;
+    if [[ -f "${CUSTOM_CSS}" ]];then
+        #Get generated css
+        cd ${STATIC_DIR};
+        STYLE_CSS=$(find ~+ -name 'styles.*.css');
+        STYLE_LNK=$(basename "${STYLE_CSS}");
+        cp ${STYLE_CSS} ${YOUTRACK_HOME}/conf/;
+        
+        #Add custom css to styles
+        cat ${CUSTOM_CSS} >> ${YOUTRACK_HOME}/conf/${STYLE_LNK};
+        cp ${YOUTRACK_HOME}/conf/${STYLE_LNK} ${STATIC_DIR}/;
+        cd /;
+    fi;
+}

@@ -1,0 +1,49 @@
+#!/bin/bash
+    
+function show_help()
+{
+   echo "Set system timezone"
+   echo
+   echo "Syntax: timezone [ --set <timezone> | --print ]";
+   echo
+   echo "Options:";
+   echo "    --set <timezone>  A valid timezone definition from zoneinfo";
+   echo "    --print           Print configured timezone";
+   echo "    --help            Print this help info";
+}
+    
+function add_zone()
+{
+    ZONES=$(echo $(awk '/^Z/ { print $2 }; /^L/ { print $3 }' /usr/share/zoneinfo/tzdata.zi) | tr ' ' ',');
+    INVALID=$(echo "$ZONES" | grep -o "$1");
+    #INVALID=$(ocie --validate "-test $ZONES -expect $1");
+    if [[ -z "$INVALID" ]];then
+        echo "Ocie: Invalid Timezone [ $1 ]";
+        echo "Ocie: Timezones available:";
+        echo "${ZONES}";
+    else
+        sed -i '/^OS_TIMEZONE\=.*$/I d' /etc/environment
+        ln -snf /usr/share/zoneinfo/$TZ /etc/localtime;
+        echo "$TZ" > /etc/timezone;
+        echo "OS_TIMEZONE=$TZ" >> /etc/environment;
+        echo "Ocie: Timezone updated to [ $1 ]";
+    fi;
+}
+
+function print_zone()
+{
+    echo $(cat /etc/environment | grep -o 'OS_TIMEZONE=.*' | cut -f2 -d'=');
+}
+    
+for cmds in "$@";do
+    shift;
+    case "$cmds" in
+        '--help')
+            show_help;;
+        '--set')
+            add_zone "$1";;
+        '--print')
+            print_zone;;
+        *);;
+    esac;
+done;

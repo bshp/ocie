@@ -1,0 +1,75 @@
+#!/bin/bash
+    
+RSA_SIZE=2048;
+RSA_NAME=server;
+RSA_PATH=/etc/ssl;
+RSA_CN=localhost;
+RSA_VALID=3650;
+RSA_TAG=0;
+OPENSSL_BIN=$(openssl version 2>&1 | grep -i -o 'Library: OpenSSL');
+    
+if [[ -z "${OPENSSL_BIN}" ]];then
+    echo "Ocie: Unable to generate new keys, openssl not found";
+    exit;
+fi;
+    
+function show_help()
+{
+   echo "Creates new ssl private key and public certificate"
+   echo
+   echo "Syntax: keys --size 2048";
+   echo
+   echo "Options:";
+   echo "    --size    <size>     The size for rsa, default: 2048";
+   echo "    --name    <name>     The name of the key/cert, .key/.pem will be added, default: server";
+   echo "    --path    <path>     Path to write to, default: /etc/ssl/";
+   echo "    --subject <subject>  Common Name/Subject for certificate, default: localhost";
+   echo "    --valid   <valid>    Validity length in days, default: 3650";
+   echo "    --tag     <tag>      Create a flag file identifier, create in same directory as --path";
+}
+    
+function get_signature()
+{
+    CERT=$1;
+    TYPE='sha1,sha256';
+    #if [[ ! -z "$2" ]];then
+    #    if [[ ! "$2" == "sha1" ]] && [[ ! "$2" == "sha256" ]];then
+    #        echo "Ocie: Invalid signature type, use one of [ sha1 | sha256 ], both will be generated";
+    #    else
+    #        TYPE="$2"
+    #    fi;
+    #fi;
+    TYPE=$(echo "${TYPE,,}" | tr -d ' ');
+    for SIG in ${TYPE//,/ };do
+        echo "Ocie: ${SIG^^} Thumbprint:$(openssl x509 -noout -fingerprint -${SIG} -in ${CERT} | cut -f2 -d'=' | sed 's/://g' | awk '{print tolower($0)}')";
+    done;
+}
+    
+for cmds in "$@";do
+    shift;
+    case "$cmds" in
+        '--help')
+            show_help;;
+        '--size')
+            RSA_SIZE="$1";;
+        '--name')
+            RSA_NAME="$1";;
+        '--path')
+            RSA_PATH="$1";;
+        '--subject')
+            RSA_CN="$1";;
+        '--valid')
+            RSA_VALID="$1";;
+        '--tag')
+            RSA_TAG="$1";;
+        *);;
+    esac;
+done;
+    
+echo "Ocie: Generating new key pair";
+openssl req -newkey rsa:${RSA_SIZE} -x509 -nodes -keyout ${RSA_PATH}/${RSA_NAME}.key -new -out ${RSA_PATH}/${RSA_NAME}.pem -subj /CN=${RSA_CN} -sha256 -days ${RSA_VALID} &>/dev/null;
+if [[ ! "${RSA_TAG}" == 0 ]];then
+    touch ${RSA_PATH}/${RSA_TAG};
+fi;
+echo "Ocie: Keygen finished";
+get_signature "${RSA_PATH}/${RSA_NAME}.pem" 

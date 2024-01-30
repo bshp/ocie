@@ -1,0 +1,109 @@
+#!/bin/bash
+    
+BASE_PKG=('ca-certificates' 'curl' 'gnupg' 'jq' 'openssl' 'tzdata' 'unzip' 'wget' 'zip');
+BASE_INSTALL=0;
+ADD_PKG='';
+REMOVE_PKG='';
+PKG_LIST='';
+PKG_PRINT=0;
+PKG_UPGRADE=0;
+    
+# Runners
+function show_help()
+{
+   echo "Ocie Package Manager";
+   echo
+   echo "Default packages:"
+   echo     "${DEFAULT_PKG[*]}";
+   echo
+   echo "Syntax: pkg --add 'apache2, tomcat' --remove 'unzip, wget' --print";
+   echo
+   echo "Options:";
+   echo "    --base     Add base packages: ${BASE_PKG[*]}";
+   echo "    --add      Add packages, comma seperated list";
+   echo "    --remove   Remove packages, comma seperated list";
+   echo "    --upgrade  Upgrade packages";
+   echo "    --print    Print package manifest";
+}
+    
+function set_manifest()
+{
+    if [[ -f /bin/jq ]];then
+        DB="$(mktemp -d)";
+        cp /var/lib/dpkg/status $DB/ >/dev/null 2>&1;
+        sed -i 's/"//g' $DB/status >/dev/null 2>&1;
+        DPKG_FORMAT='\{\"name\"\:\"${binary:Package}\"\,\"version\"\:\"${Version}\"\,\"summary\"\:\"${binary:Summary}\"\,\"maintainer\"\:\"${Maintainer}\"\}\,';
+        DPKG_LIST=$(dpkg-query -W --admindir=$DB -f=$DPKG_FORMAT);
+        PKG_INSTALLED=$(echo "["${DPKG_LIST::-1}"]");
+        echo "${PKG_INSTALLED}" | jq > "${OCIE_HOME}/package_manifest.json";
+        rm -rf "$DB" >/dev/null 2>&1;
+    fi;
+}
+    
+function get_manifest()
+{
+    [[ ! -f ${OCIE_HOME}/package_manifest.json ]] && set_manifest;
+    [[ -f /bin/jq ]] && jq . ${OCIE_HOME}/package_manifest.json;
+}
+    
+for cmds in "$@"; do
+  shift
+  case "$cmds" in
+    '--help')
+        show_help;;
+    '--base')
+        BASE_INSTALL=1;;
+    '--add')
+        ADD_PKG=$(echo $1 | tr -d ' ');;
+    '--remove')
+        REMOVE_PKG=$(echo $1 | tr -d ' ');;
+    '--upgrade')
+        PKG_UPGRADE=1;;
+    '--print')
+        PKG_PRINT=1;;
+    *);;
+  esac
+done
+    
+# Add
+if [[ ! "$ADD_PKG" == "" ]];then
+    for i in ${ADD_PKG//,/ };do
+        BASE_PKG+=("$i");
+    done;
+fi;
+    
+# Remove
+if [[ ! "$REMOVE_PKG" == "" ]];then
+    for d in ${REMOVE_PKG//,/ };do
+        if [[ ${BASE_PKG[@]} =~ $d ]];then
+            BASE_PKG=("${BASE_PKG[@]/$d}");
+        fi;
+    done;
+fi;
+    
+# Add/Remove Packages
+if [[ "$BASE_INSTALL" == 1 ]] || [[ ! "$ADD_PKG" == "" ]] || [[ ! "$REMOVE_PKG" == "" ]];then
+    PKG_LIST=$(echo "${BASE_PKG[*]}");
+    echo "Ocie: Package Manager: To be installed:";
+    echo "  Add: $PKG_LIST";
+    apt-get -qq update >/dev/null;
+    DEBIAN_FRONTEND=noninteractive ACCEPT_EULA=Y apt-get -qq install -y --no-install-recommends $PKG_LIST >/dev/null;
+    #apt-get -qq purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false;
+    set_manifest;
+    echo "Ocie: Package Manager: Finished";
+    echo "Ocie: Package Manager: Manifest updated, file: ${OCIE_HOME}/package_manifest.json";
+fi;
+
+if [[ "$PKG_UPGRADE" == 1 ]];then
+    echo "Ocie: Package Manager: Update starting";
+    apt-get -qq update >/dev/null;
+    DEBIAN_FRONTEND=noninteractive ACCEPT_EULA=Y apt-get upgrade -y --no-install-recommends;
+    set_manifest;
+    echo "Ocie: Package Manager: Update finished";
+    echo "Ocie: Package Manager: Manifest updated, file: ${OCIE_HOME}/package_manifest.json";
+fi;
+    
+# Wants package list printed
+if [[ $PKG_PRINT == 1 ]];then
+    get_manifest;
+fi;

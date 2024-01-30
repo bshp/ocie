@@ -1,0 +1,30 @@
+#!/bin/bash
+    
+# Tomcat specific
+if [[ -f "${OCIE_HOME}/conf/ocie-tomcat.init" ]];then
+    reset_config;
+fi;
+    
+APP_RUNAS="tomcat";
+IP_REGEX="${VADC_IP_ADDRESS// /|}";
+APP_PROXIES="${IP_REGEX//./\\.}";
+APP_OPTS=$(echo 'export JAVA_OPTS="'$JAVA_OPTS $APP_PARAMS'"');
+echo ${APP_OPTS} > ${CATALINA_HOME}/bin/setenv.sh;
+echo "export VADC_IP_REG=${APP_PROXIES}" >> ${CATALINA_HOME}/bin/setenv.sh;
+chmod -R 0755 "${CATALINA_HOME}/bin/setenv.sh";
+cp "${APACHE_MODS}/jk.conf.dist" "${APACHE_MODS}/jk.conf";
+cp "${APACHE_MODS}/jk.load.dist" "${APACHE_MODS}/jk.load";
+CATALINA_CFG=$(ociectl --test);
+if [[ ! -z "${CATALINA_CFG}" ]];then
+    echo "Ocie Config: Tomcat config test FAILED, reverting changes";
+    echo "Ocie Config: Result: ${CATALINA_CFG}";
+    reset_config;
+    exit 1;
+fi;
+export APP_RUNAS="${APP_RUNAS}";
+echo "#Tomcat Initialized" > ${OCIE_HOME}/conf/ocie-tomcat.init;
+echo "Ocie Config: Tomcat Config Test PASSED, using updated configuration";
+echo "Ocie Config: Tomcat RemoteIpValve configured with [internalProxies: ${APP_PROXIES}, remoteIpHeader: ${VADC_IP_HEADER}]";
+echo "Ocie Config: Configured JAVA_OPTS with ${APP_OPTS}";
+echo "Ocie Config: Initialization complete";
+echo "Ocie Config: You can run the app as [ ${APP_RUNAS} ] OR risk it for the biscuit and run as root";

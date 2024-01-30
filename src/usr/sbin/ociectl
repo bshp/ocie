@@ -1,0 +1,117 @@
+#!/bin/bash
+    
+APP_FOUND="false";
+    
+IFS=:
+for APP_PATH in ${OCIE_TYPES};do
+    if [[ -d "${APP_PATH}" ]];then
+        if [[ ! "${APP_PATH}" == "${OCIE_LIB}/types" ]];then
+            if [[ -f "${APP_PATH}/config.ocie" ]];then
+                APP_FOUND="true";
+                . ${APP_PATH}/config.ocie;
+                break;
+            fi;
+        fi;
+    else
+        echo "Ocie: The included path is not a directory or is not readable, your setting [ ${APP_PATH} ]";
+    fi;
+done;
+unset IFS;
+    
+# Check default path
+if [[ "${APP_FOUND}" == "false" ]];then
+    if [[ -f "${OCIE_LIB}/types/${APP_TYPE}.ocie" ]];then
+        . ${OCIE_LIB}/types/${APP_TYPE}.ocie;
+    else
+        echo "Ocie: Application definition not found in any available path, type: [ config.ocie ]";
+        echo "Ocie: Create a definition in your application, set the environment OCIE_TYPES, e.g OCIE_TYPES="'${OCIE_TYPES}'":/etc/myapp/dir_where_config_is_located";
+        exit 1;
+    fi;
+fi;
+    
+function show_help()
+{
+    echo "OCIE Application Control";
+    echo
+    echo "Syntax: ociectl [ --reload | --run | --stop ]";
+    echo
+    echo "Parameters:";
+    echo
+    echo "--reload   Reload the application";
+    echo
+    echo "--run      Run the application";
+    echo
+    echo "--stop     Stop the application";
+    echo
+    echo "--test     Test the applications config";
+    echo
+}
+    
+function ocie_shutdown()
+{
+    echo
+    echo "Ocie: Recieved stop signal, shutting down";
+    app_shutdown;
+    exit 0;
+}
+    
+function ocie_certs()
+{
+    if [[ $(type -t app_certs) == function ]];then
+        app_certs;
+    fi;
+}
+    
+function ocie_config()
+{
+    if [[ $(type -t app_config) == function ]];then
+        app_config;
+    fi;
+}
+    
+function ocie_update()
+{
+    if [[ $(type -t app_update) == function ]];then
+        app_update;
+    fi;
+}
+    
+function ocie_test()
+{
+    if [[ $(type -t app_test) == function ]];then
+        echo $(app_test);
+    fi;
+}
+    
+function ocie_reload()
+{
+    app_reload;
+}
+    
+function ocie_start()
+{
+    ocie_certs;
+    ocie_config;
+    ocie_update;
+    app_start;
+}
+    
+# Shutdown - SIGINT, SIGTERM, SIGWINCH
+trap ocie_shutdown 2 15 28
+    
+for cmds in "$@";do
+    shift;
+    case "$cmds" in
+        '--help')
+            show_help;;
+        '--reload')
+            ocie_reload;;
+        '--run')
+            ocie_start;;
+        '--stop')
+            ocie_shutdown;;
+        '--test')
+            ocie_test;;
+        *);;
+    esac;
+done;
