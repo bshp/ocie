@@ -1,6 +1,6 @@
 #### Ocie Types  
 To utilize ociectl, create a new config.ocie definition in your container somewhere using the functions below.    
-Customize the definition however you want, then set the environment OCIE_TYPES=${OCIE_TYPES}:/etc/myapp/path_to_definition    
+Customize the definition however you want, then set the environment OCIE_CONFIG=/etc/myapp/path_to_definition    
 #### Required
 ````
 #!/bin/bash

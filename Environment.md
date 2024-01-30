@@ -55,10 +55,10 @@
             }
         }
     },
-    "OCIE_TYPES": {
-        "type": "path:multi",
+    "OCIE_CONFIG": {
+        "type": "path",
         "default": "${OCIE_LIB}/types",
-        "description": "Path to definition type",
+        "description": "Path where config.ocie lives",
         "containers": "all",
         "usage": {
             "ociectl": {
