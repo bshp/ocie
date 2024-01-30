@@ -13,13 +13,14 @@ LABEL org.opencontainers.image.authors="jason.everling@gmail.com"
 ARG OS_VERSION
 ARG TZ
     
+ENV OCIE_HOME=/etc/ocie
+ENV OCIE_LIB=/usr/lib/ocie
+    
 # Add Ocie
 COPY --chown=root:root --chmod=0755 ./src/ ./
     
 RUN <<-"EOD" bash
     set -eu;
-    OCIE_HOME=/etc/ocie
-    OCIE_LIB=/usr/lib/ocie
     echo "Ocie: Setting up environment";
     echo "OCIE_BIN=/usr/sbin" >> /etc/environment;
     echo "OCIE_HOME=${OCIE_HOME}" >> /etc/environment;
