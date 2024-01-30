@@ -26,7 +26,6 @@ RUN <<-"EOD" bash
     echo "OCIE_BIN=/usr/sbin" >> /etc/environment;
     echo "OCIE_HOME=${OCIE_HOME}" >> /etc/environment;
     echo "OCIE_LIB=${OCIE_LIB}" >> /etc/environment;
-    echo "OCIE_TYPES=${OCIE_TYPES}" >> /etc/environment;
     echo "OS_BASE=${OS_VERSION}" >> /etc/environment;
     echo "OS_CODENAME=$(grep -o 'VERSION_CODENAME=.*' </etc/os-release | cut -f2 -d'=')" >> /etc/environment;
     echo "OS_IMAGE=ubuntu:${OS_VERSION}" >> /etc/environment;

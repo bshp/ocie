@@ -37,12 +37,12 @@ function update_jvm()
 {
     if [[ "${JAVA_HOME}" != "" ]];then
         for CA_CRT in /usr/local/share/ca-certificates/*.crt; do
-            CA_NAME=$(openssl x509 -noout -subject -nameopt multiline -in $CA_CRT | sed -n 's/ *commonName *= //p');
+            CA_NAME=$(openssl x509 -noout -subject -nameopt multiline -in $CA_CRT | tr -d ' ' | grep -o 'commonName=.*' | cut -f2 -d'=');
             CA_EXISTS=$(${JAVA_HOME}/bin/keytool -list -cacerts -storepass changeit -alias "$CA_NAME" | echo $?);
             if [ "$CA_EXISTS" -eq 0 ];then
-                ${JAVA_HOME}/bin/keytool -import -trustcacerts -cacerts \
-                    -storepass changeit -noprompt -alias "$CA_NAME" -file $CA_CRT >/dev/null 2>&1 \
-                    | echo "Ocie: CA Import: Added certificate to cacert, $CA_CRT";
+                ${JAVA_HOME}/bin/keytool \
+                -import -trustcacerts -cacerts -storepass changeit -noprompt -alias "$CA_NAME" -file $CA_CRT >/dev/null 2>&1 \
+                | echo "Ocie: CA Import: Added certificate to cacert, $CA_CRT";
             else 
                 echo "Ocie: CA Import: Certificate ${CA_NAME} already exists, not adding";
             fi;
@@ -56,7 +56,7 @@ function update_os()
 {
     certs=$(ls /usr/local/share/ca-certificates/*.crt 2> /dev/null | wc -l);
     if [ "${certs}" -ne 0 ];then
-        update-ca-certificates;
+        update-ca-certificates &> /dev/null;
     else
         echo "Ocie: CA Import: No certificates were found to import";
     fi;
