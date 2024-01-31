@@ -32,23 +32,23 @@ function reset_config()
     SITE_TEMPLATE=/etc/apache2/sites-available;
     
     if [[ -f "${APACHE_MODS}/rewrite.conf" ]];then
-        mv -f "${APACHE_MODS}/rewrite.conf" ./rewrite.conf.previous;
+        mv -f "${APACHE_MODS}/rewrite.conf" "${APACHE_MODS}/rewrite.conf.previous";
     fi;
     if [[ -f "${APACHE_MODS}/headers.conf" ]];then
-        mv -f "${APACHE_MODS}/headers.conf" ./headers.conf.previous;
+        mv -f "${APACHE_MODS}/headers.conf" "${APACHE_MODS}/headers.conf.previous";
     fi;
     if [[ -f "${APACHE_MODS}/jk.conf" ]];then
-        mv -f "${APACHE_MODS}/jk.conf" ./jk.conf.previous;
+        mv -f "${APACHE_MODS}/jk.conf" "${APACHE_MODS}/jk.conf.previous";
     fi;
     if [[ -f "${APACHE_MODS}/jk.load" ]];then
-        mv -f "${APACHE_MODS}/jk.load" ./jk.load.previous;
+        mv -f "${APACHE_MODS}/jk.load" "${APACHE_MODS}/jk.load.previous";
     fi;
     if [[ -f "${APACHE_SITES}/000-default.conf" ]];then
-        mv -f "${APACHE_SITES}/000-default.conf" ./000-default.conf.previous;
+        mv -f "${APACHE_SITES}/000-default.conf" "${APACHE_SITES}/000-default.conf.previous";
         cp -f "${SITE_TEMPLATE}/000-default.conf.dist" "${APACHE_SITES}/000-default.conf";
     fi;
     if [[ -f "${APACHE_SITES}/default-ssl.conf" ]];then
-        mv -f "${APACHE_SITES}/default-ssl.conf" ./default-ssl.conf.previous;
+        mv -f "${APACHE_SITES}/default-ssl.conf" "${APACHE_SITES}/default-ssl.conf.previous";
         cp -f "${SITE_TEMPLATE}/default-ssl.conf.dist" "${APACHE_SITES}/default-ssl.conf";
     fi;
 }

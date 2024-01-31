@@ -55,8 +55,7 @@ function ocie_certs()
             app_certs;
         fi;
     else
-        echo "Ocie: CA Import is DISABLED, skipping";
-        echo "Ocie: Set CA_ENABLED=1 in order activate";
+        echo "Ocie: CA Import is DISABLED, set CA_ENABLED=1 in order activate, skipping..";
     fi;
 }
     
@@ -74,8 +73,7 @@ function ocie_keys()
             app_keys;
         fi;
     else
-        echo "Ocie: Certificate keygen is DISABLED, skipping";
-        echo "Ocie: Set CERT_ENABLED=1 in order activate";
+        echo "Ocie: Certificate keygen is DISABLED, set CERT_ENABLED=1 in order activate, skipping..";
     fi;
 }
     
@@ -86,8 +84,7 @@ function ocie_update()
             app_update;
         fi;
     else
-        echo "Ocie: App Deployment/Update is DISABLED, skipping";
-        echo "Ocie: Set APP_DEPLOY=1 in order activate";
+        echo "Ocie: App Deployment/Update is DISABLED, set APP_DEPLOY=1 in order activate, skipping..";
     fi;
 }
     
