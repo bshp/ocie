@@ -41,76 +41,58 @@ function deploy_app()
     
 function update_app()
 {
+    echo "Ocie: App Updater: Deployed: [ ${SIG_LOCAL} ], Latest: [ ${SIG_UPDATE} ]";
     if [[ "${SIG_LOCAL}" == "${SIG_UPDATE}" ]];then
-        echo "Ocie Updater: Update is not needed, deployed: ${SIG_LOCAL}, latest: ${SIG_UPDATE}";
-    fi;
-    if [[ "${APP_UPDATE_AUTO}" == 1 ]];then
+        echo "Ocie: App Updater: Application is up-to-date";
+    else
+        echo "Ocie: App Updater: Updating application";
         deploy_app;
     fi;
 }
     
 #Run
     
-if [[ "${APP_UPDATE_PATH}" == "" ]];then
-    echo "Ocie Updater: Nothing to do";
-else
-    if [[ "${APP_TYPE}" == "" ]];then
-        echo "Ocie Updater: Required APP_TYPE is not set";
-        exit 22;
-    elif [[ "${APP_NAME}" == "" ]];then
-        echo "Ocie Updater: Required APP_NAME is not set";
+if [[ ! "${APP_UPDATE_PATH}" == "" ]];then
+    if [[ "${APP_TYPE}" == "" ]] || [[ "${APP_NAME}" == "" ]];then
+        echo "Ocie: App Updater: Required APP_NAME or APP_TYPE is not set";
+        echo "Ocie: App Updater: APP_UPDATE is ENABLED, set APP_UPDATE=0 to bypass this function, terminating application";
         exit 22;
     else
-        echo "Ocie Updater: Checking if deployment or update needed";
+        echo "Ocie: App Updater: APP_TYPE is ${APP_TYPE}";
+        echo "Ocie: App Updater: Checking if deployment or update needed";
     fi;
-    
-    echo "Ocie Updater: APP_TYPE is ${APP_TYPE}";
-    
-    if [[ "${APP_TYPE}" == "apache" ]];then
-        APP_HOME="/var/www/html";
-        APP_DEPLOY="/var/www/html";
-        APP_LATEST="${APP_UPDATE_PATH}/${APP_NAME}";
-    fi;
-    
+    APP_HOME="/var/www/html";
+    APP_LOCAL="/var/www/html";
+    APP_LATEST="${APP_UPDATE_PATH}/${APP_NAME}";
     if [[ "${APP_TYPE}" == "tomcat" ]];then
         APP_HOME="${CATALINA_HOME}/webapps/";
-        APP_DEPLOY="${APP_HOME}${APP_NAME}.war";
+        APP_LOCAL="${APP_HOME}${APP_NAME}.war";
         APP_LATEST="${APP_UPDATE_PATH}/${APP_NAME}.war";
-        if [[ "${APP_DATA}" == "/var/www/html" ]];then
-            APP_DATA="/etc/${APP_NAME}";
-            echo "Ocie Updater: APP_DATA is set to /var/www, changing to ${APP_DATA}";
-        fi;
-        if [[ "${APP_OWNER}" == "www-data" ]];then
-            APP_OWNER="root";
-            echo "Ocie Updater: APP_OWNER is set to www-data, changing to ${APP_OWNER}";
-        fi;
-        if [[ "${APP_GROUP}" == "www-data" ]];then
-            APP_GROUP="tomcat";
-            echo "Ocie Updater: APP_GROUP is set to www-data, changing to ${APP_GROUP}";
-        fi;
     fi;
-    
     if [[ ! -d "${APP_DATA}" ]]; then
-        echo "Ocie Updater: Data directory for application does not exist, creating ${APP_DATA}";
+        echo "Ocie: App Updater: Data directory for application does not exist, creating ${APP_DATA}";
         install -d -m 0770 -o ${APP_OWNER} -g ${APP_GROUP} ${APP_DATA};
-    fi
-    
-    SIG_LOCAL=$(get_signature "local" "${APP_DEPLOY}");
+    fi;
+    # Deploy application
+    SIG_LOCAL=$(get_signature "local" "${APP_LOCAL}");
     SIG_UPDATE=$(get_signature "update" "${APP_LATEST}");
-    
+    echo "Ocie: App Updater: Application data [ ${APP_DATA} ]";
+    echo "Ocie: App Updater: Application owner [ ${APP_OWNER} ]";
+    echo "Ocie: App Updater: Application group [ ${APP_GROUP} ]";
     if [[ "${SIG_LOCAL}" == "0" ]] && [[ "${SIG_UPDATE}" == "0" ]];then
-        echo "Ocie Updater: Application has not been deployed and was not found in ${APP_UPDATE_PATH}";
+        echo "Ocie: App Updater: Application IS NOT DEPLOYED, Application NOT FOUND in path [ ${APP_UPDATE_PATH} ]";
         exit 2;
     elif [[ "${SIG_LOCAL}" == "0" ]] && [[ "${SIG_UPDATE}" != "0" ]];then
-        echo "Ocie Updater: Application has not been deployed, deploying from ${APP_UPDATE_PATH}";
+        echo "Ocie: App Updater: Application IS NOT DEPLOYED, Application FOUND in path [ ${APP_UPDATE_PATH} ]";
         deploy_app;
     elif [[ "${SIG_LOCAL}" != "0" ]] && [[ "${SIG_UPDATE}" == "0" ]];then
-        echo "Ocie Updater: Application is deployed but update is empty, failure enabled: ${APP_UPDATE_FAIL}";
-        if [[ "${APP_UPDATE_FAIL}" == 1 ]];then
+        echo "Ocie: App Updater: Application IS DEPLOYED, Update NOT FOUND in path [ ${APP_UPDATE_PATH} ]";
+        if [[ "${APP_UPDATE_STRICT}" == 1 ]];then
+            echo "Ocie: App Updater: Strict update checks are ENABLED, terminating application";
             exit 2;
         fi;
     else
-        echo "Ocie Updater: Auto-update is enabled: ${APP_UPDATE_AUTO}, deployed: ${SIG_LOCAL}, latest: ${SIG_UPDATE}";
+        echo "Ocie: App Updater: Checking if update is needed";
         update_app;
     fi;
 fi;

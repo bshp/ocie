@@ -11,11 +11,11 @@ function show_help()
    echo
    echo "--cacerts    Update CA Certificate Stores, certificates must have the .crt extension";
    echo "    Required:"
-   echo "       -path <path> Path to import CA Certs from, prefixed with either [ url: | file:file ], default: env CERT_PATH";
+   echo "       -path <path> Path to import CA Certs from, prefixed with either [ url: | file:file ], default: env CA_PATH";
    echo "    Optional:";
-   echo "       -os Import into operating system store, /etc/ssl, default: env CERT_UPDATE_OS";
-   echo "       -jvm Import into java store, default: env CERT_UPDATE_JVM";
-   echo "       -filter Filter to find CA cert files by, default: env CERT_FILTER";
+   echo "       -os Import into operating system store, /etc/ssl, default: env CA_UPDATE_OS";
+   echo "       -jvm Import into java store, default: env CA_UPDATE_JVM";
+   echo "       -filter Filter to find CA cert files by, default: env CA_FILTER";
    echo
    echo "--dhparams    Generate new dhparams";
    echo "    Optional:"

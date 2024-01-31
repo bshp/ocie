@@ -50,8 +50,13 @@ function ocie_shutdown()
     
 function ocie_certs()
 {
-    if [[ $(type -t app_certs) == function ]];then
-        app_certs;
+    if [[ "${CA_ENABLED}" == 1 ]];then
+        if [[ $(type -t app_certs) == function ]];then
+            app_certs;
+        fi;
+    else
+        echo "Ocie: CA Import is DISABLED, skipping";
+        echo "Ocie: Set CA_ENABLED=1 in order activate";
     fi;
 }
     
@@ -62,10 +67,27 @@ function ocie_config()
     fi;
 }
     
+function ocie_keys()
+{
+    if [[ "${CERT_ENABLED}" == 1 ]];then
+        if [[ $(type -t app_keys) == function ]];then
+            app_keys;
+        fi;
+    else
+        echo "Ocie: Certificate keygen is DISABLED, skipping";
+        echo "Ocie: Set CERT_ENABLED=1 in order activate";
+    fi;
+}
+    
 function ocie_update()
 {
-    if [[ $(type -t app_update) == function ]];then
-        app_update;
+    if [[ "${APP_DEPLOY}" == 1 ]];then
+        if [[ $(type -t app_update) == function ]];then
+            app_update;
+        fi;
+    else
+        echo "Ocie: App Deployment/Update is DISABLED, skipping";
+        echo "Ocie: Set APP_DEPLOY=1 in order activate";
     fi;
 }
     
@@ -84,6 +106,7 @@ function ocie_reload()
 function ocie_start()
 {
     ocie_certs;
+    ocie_keys;
     ocie_config;
     ocie_update;
     app_start;

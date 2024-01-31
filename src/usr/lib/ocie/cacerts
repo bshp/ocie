@@ -1,15 +1,10 @@
 #!/bin/bash
     
-IMPORT_AUTO="${CA_AUTO_UPDATE:-1}";
-IMPORT_OS="${CA_UPDATE_OS:-0}";
-IMPORT_JVM="${CA_UPDATE_JVM:-0}";
-IMPORT_PATH="";
-IMPORT_FILTER="*_CA.crt";
-CA_PATH="${IMPORT_PATH:-${CA_PATH}}";
-CA_FILTER="${IMPORT_FILTER:-${CA_FILTER}}";
-PATH_TYPE="${CA_PATH%%:*}";
-CA_PATH="${CA_PATH#*:}";
-JAVA_HOME="${JAVA_HOME:-}";
+CA_FILTER="${CA_FILTER:-*_CA.crt}";
+CA_PATH="${CA_PATH:-}";
+CA_UPDATE_AUTO="${CA_UPDATE_AUTO:-1}";
+CA_UPDATE_OS="${CA_UPDATE_OS:-0}";
+CA_UPDATE_JVM="${CA_UPDATE_JVM:-0}";
     
 function show_help()
 {
@@ -35,21 +30,18 @@ function auto_update()
     
 function update_jvm()
 {
-    if [[ "${JAVA_HOME}" != "" ]];then
-        for CA_CRT in /usr/local/share/ca-certificates/*.crt; do
-            CA_NAME=$(openssl x509 -noout -subject -nameopt multiline -in $CA_CRT | tr -d ' ' | grep -o 'commonName=.*' | cut -f2 -d'=');
-            CA_EXISTS=$(${JAVA_HOME}/bin/keytool -list -cacerts -storepass changeit -alias "$CA_NAME" | echo $?);
-            if [ "$CA_EXISTS" -eq 0 ];then
-                ${JAVA_HOME}/bin/keytool \
-                -import -trustcacerts -cacerts -storepass changeit -noprompt -alias "$CA_NAME" -file $CA_CRT >/dev/null 2>&1 \
-                | echo "Ocie: CA Import: Added certificate to cacert, $CA_CRT";
-            else 
-                echo "Ocie: CA Import: Certificate ${CA_NAME} already exists, not adding";
-            fi;
-        done;
-    else 
-        echo "Ocie: CA Import: JAVA_HOME is undefined in environment, nothing to import";
-    fi;
+
+    for CA_CRT in /usr/local/share/ca-certificates/*.crt; do
+        CA_NAME=$(openssl x509 -noout -subject -nameopt multiline -in $CA_CRT | tr -d ' ' | grep -o 'commonName=.*' | cut -f2 -d'=');
+        CA_EXISTS=$(${JAVA_HOME}/bin/keytool -list -cacerts -storepass changeit -alias "$CA_NAME" | echo $?);
+        if [ "$CA_EXISTS" -eq 0 ];then
+            ${JAVA_HOME}/bin/keytool \
+            -import -trustcacerts -cacerts -storepass changeit -noprompt -alias "$CA_NAME" -file $CA_CRT >/dev/null 2>&1 \
+            | echo "Ocie: CA Import: Added certificate to cacert, $CA_CRT";
+        else 
+            echo "Ocie: CA Import: Certificate ${CA_NAME} already exists, skipping";
+        fi;
+    done;
 }
     
 function update_os()
@@ -66,10 +58,10 @@ function get_certs()
 {
     cd /usr/local/share/ca-certificates;
     if [[ "${PATH_TYPE}" == "url" ]];then
-        wget -q -r -nH -A ${CA_FILTER} "${CA_PATH}";
+        wget -q -r -nH -A ${CA_FILTER} "${IMPORT_PATH}";
     else 
-        if [ -d "${CA_PATH}" ];then
-            cp -R ${CA_PATH}/${CA_FILTER} /usr/local/share/ca-certificates/;
+        if [ -d "${IMPORT_PATH}" ];then
+            cp -R ${IMPORT_PATH}/${CA_FILTER} /usr/local/share/ca-certificates/;
         else
             echo "Ocie: CA Import: Unable to read ${CA_PATH} or it is not a valid directory";
         fi;
@@ -88,40 +80,46 @@ for cmds in "$@";do
         '--help')
             show_help;;
         '--os')
-            IMPORT_OS=1;;
+            CA_UPDATE_OS=1;;
         '--jvm')
-            IMPORT_JVM=1;;
+            CA_UPDATE_JVM=1;;
         '--path')
-            IMPORT_PATH="$1";;
+            CA_PATH="$1";;
         '--filter')
-            IMPORT_FILTER="$1";;
+            CA_FILTER="$1";;
         *);;
     esac;
 done;
     
 #Run
-if [[ ${CA_PATH} != "" ]];then
+if [[ ! -z "${CA_PATH}" ]];then
+    IMPORT_PATH="${CA_PATH#*:}";
+    PATH_TYPE="${CA_PATH%%:*}";
     if [[ ! "${PATH_TYPE}" == "file" ]] && [[ ! "${PATH_TYPE}" == "url" ]];then
         echo "Ocie: CA Import: Unable to determine CA_PATH type, ${PATH_TYPE}, only file: or url: are valid";
     else
         echo "Ocie: CA Import: Starting";
         get_certs;
-        if [[ ${IMPORT_AUTO} == 1 ]];then
+        if [[ ${CA_UPDATE_AUTO} == 1 ]];then
             echo "Ocie: CA Import: Auto Update is enabled";
             auto_update;
         else
-            if [[ ${IMPORT_OS} == 1 ]];then
+            if [[ ${CA_UPDATE_OS} == 1 ]];then
                 echo "Ocie: CA Import: Updating OS CA Store";
                 update_os;
             fi;
-            if [[ ${IMPORT_JVM} == 1 ]];then
-                echo "Ocie: CA Import: Updating JVM CA Store";
-                update_jvm;
+            if [[ ${CA_UPDATE_JVM} == 1 ]];then
+                if [[ ! -z "${JAVA_HOME}" ]];then
+                    echo "Ocie: CA Import: Updating JVM CA Store";
+                    update_jvm;
+                else
+                    echo "Ocie: CA Import: JAVA_HOME is undefined, skipping";
+                fi;
             fi;
         fi;
         cleanup;
         echo "Ocie: CA Import: Finished";
     fi;
 else
-    echo "Ocie: CA Import: --path | env CA_PATH is not defined, nothing to do";
+    echo "Ocie: CA Import: --path | env CA_PATH is not defined, skipping";
 fi;

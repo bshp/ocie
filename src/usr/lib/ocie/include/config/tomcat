@@ -3,20 +3,38 @@
 . ${OCIE_LIB}/include/config/apache;
     
 # Tomcat specific
+APP_PROXIES="$(echo ${VADC_IP_ADDRESS// /|} | sed 's/\./\\./g' | sed 's|\/|\\/|g')";
 if [[ -f "${OCIE_HOME}/conf/ocie-tomcat.init" ]];then
     reset_config;
 fi;
     
-APP_RUNAS="tomcat";
-APP_PROXIES="$(echo ${VADC_IP_ADDRESS// /|} | sed 's/\./\\./g' | sed 's|\/|\\/|g')";
-    
-# Add environment variables to tomcat 
-echo "export JAVA_OPTS=\"${JAVA_OPTS} ${APP_PARAMS}\"" > ${CATALINA_HOME}/bin/setenv.sh
-echo "export VADC_IP_REG=\"${APP_PROXIES}\"" >> ${CATALINA_HOME}/bin/setenv.sh
-chmod -R 0755 "${CATALINA_HOME}/bin/setenv.sh";
+function apache_mod_jk()
+{
+    cp "${APACHE_MODS}/jk.conf.dist" "${APACHE_MODS}/jk.conf" >/dev/null 2>&1;
+    cp "${APACHE_MODS}/jk.load.dist" "${APACHE_MODS}/jk.load" >/dev/null 2>&1;
+}
+
+function tomcat_set_env()
+{
+    echo "export JAVA_OPTS=\"${JAVA_OPTS} ${APP_PARAMS}\"" > ${CATALINA_HOME}/bin/setenv.sh
+    echo "export VADC_IP_REG=\"${APP_PROXIES}\"" >> ${CATALINA_HOME}/bin/setenv.sh
+    chmod -R 0755 "${CATALINA_HOME}/bin/setenv.sh";
+}
+
+function tomcat_server_cfg()
+{
+    if [[ -f "${CATALINA_HOME}/conf/server.xml" ]];then
+        mv "${CATALINA_HOME}/conf/server.xml" "${CATALINA_HOME}/conf/server.xml.previous" >/dev/null 2>&1;
+    fi;
+    if [[ -f "${CATALINA_HOME}/conf/server.xml.dist" ]];then
+        cp "${CATALINA_HOME}/conf/server.xml.dist" "${CATALINA_HOME}/conf/server.xml" >/dev/null 2>&1;
+    fi;
+}
+
+# Set environment 
+tomcat_set_env;
 # Enable libapache2-mod-jk
-cp "${APACHE_MODS}/jk.conf.dist" "${APACHE_MODS}/jk.conf";
-cp "${APACHE_MODS}/jk.load.dist" "${APACHE_MODS}/jk.load";
+apache_mod_jk;
     
 # Ensure config is valid
 CATALINA_CFG=$(ociectl --test);
@@ -28,10 +46,13 @@ if [[ ! -z "${CATALINA_CFG}" ]];then
 fi;
     
 # Set ready
-export APP_RUNAS="${APP_RUNAS}";
 echo "#Tomcat Initialized" > ${OCIE_HOME}/conf/ocie-tomcat.init;
 echo "Ocie Config: Tomcat Config Test PASSED, using updated configuration";
 echo "Ocie Config: Tomcat RemoteIpValve configured with [internalProxies: ${APP_PROXIES}, remoteIpHeader: ${VADC_IP_HEADER}]";
 echo "Ocie Config: Configured JAVA_OPTS with ${APP_OPTS}";
 echo "Ocie Config: Initialization complete";
-echo "Ocie Config: You can run the app as [ ${APP_RUNAS} ] OR risk it for the biscuit and run as root";
+if [[ "${APP_OWNER}" == "root" ]];then
+    echo "Ocie Config: App is set to run as [ root ], set APP_OWNER to change the account";
+else
+    echo "Ocie Config: The app will run as [ ${APP_OWNER} ] OR you can set set APP_OWNER to root and risk it for the biscuit";
+fi;

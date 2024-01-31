@@ -288,10 +288,10 @@
             }
         }
     },
-    "REWRITE_SKIP": {
+    "REWRITE_ENABLED": {
         "type": "boolean",
-        "default": 1,
-        "description": "Skip rewrite rules",
+        "default": 0,
+        "description": "Activate rewrite rules from config",
         "containers": "apache2:firefly:walrus",
         "usage": {
             "config": {
