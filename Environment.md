@@ -1,56 +1,15 @@
 ```json
 {
-    "CA_AUTO_UPDATE": {
-        "type": "boolean",
-        "default": 0,
-        "description": "Auto update CA Certs",
+    "OCIE_BIN": {
+        "type": "system",
+        "default": "/usr/sbin",
+        "description": "Ocie Bin Files",
         "containers": "all",
         "usage": {
-            "cacerts": {
+            "self": {
                 "required": true
-            }
-        }
-    },
-    "CA_UPDATE_JVM": {
-        "type": "boolean",
-        "default": 0,
-        "description": "Update the JVM",
-        "containers": "all",
-        "usage": {
-            "cacerts": {
-                "required": true
-            }
-        }
-    },
-    "CERT_UPDATE_KEYS": {
-        "type": "boolean",
-        "default": 0,
-        "description": "Update server cert/key pair and DHE Params",
-        "containers": "all",
-        "usage": {
-            "keys": {
-                "required": true
-            }
-        }
-    },
-    "CA_UPDATE_OS": {
-        "type": "boolean",
-        "default": 1,
-        "description": "Update the OS Store",
-        "containers": "all",
-        "usage": {
-            "cacerts": {
-                "required": true
-            }
-        }
-    },
-    "DH_PARAM_SIZE": {
-        "type": "integer",
-        "default": 2048,
-        "description": "DH Size to generate",
-        "containers": "all",
-        "usage": {
-            "dhparams": {
+            },
+            "children": {
                 "required": true
             }
         }
@@ -62,64 +21,6 @@
         "containers": "all",
         "usage": {
             "ociectl": {
-                "required": true
-            }
-        }
-    },
-    "CA_PATH": {
-        "type": "path:single",
-        "default": "",
-        "description": "Path to where CA Certs are, must have .crt extension",
-        "containers": "all",
-        "usage": {
-            "cacerts": {
-                "required": true
-            }
-        }
-    },
-    "CERT_PATH": {
-        "type": "path:single",
-        "default": "/etc/ssl",
-        "description": "Path to where keypair should be store",
-        "containers": "all",
-        "usage": {
-            "keys": {
-                "required": false
-            }
-        }
-    },
-    "CA_FILTER": {
-        "type": "string",
-        "default": "*_CA.crt",
-        "description": "Filter to apply onto CA_PATH",
-        "containers": "all",
-        "usage": {
-            "cacerts": {
-                "required": true
-            }
-        }
-    },
-    "CERT_SUBJECT": {
-        "type": "string",
-        "default": "localhost",
-        "description": "Subject of certificate",
-        "containers": "all",
-        "usage": {
-            "keys": {
-                "required": false
-            }
-        }
-    },
-    "OCIE_BIN": {
-        "type": "system",
-        "default": "/usr/sbin",
-        "description": "Ocie Bin Files",
-        "containers": "all",
-        "usage": {
-            "self": {
-                "required": true
-            },
-            "children": {
                 "required": true
             }
         }
@@ -222,83 +123,6 @@
             }
         }
     },
-    "APP_UPDATE_AUTO": {
-        "type": "boolean",
-        "default": 1,
-        "description": "Auto update app from APP_UPDATE_PATH",
-        "containers": "apache2:firefly:walrus",
-        "usage": {
-            "config": {
-                "required": false
-            }
-        }
-    },
-    "APP_UPDATE_FAIL": {
-        "type": "boolean",
-        "default": 0,
-        "description": "If app cannot update, should we fail to start",
-        "containers": "apache2:firefly:walrus",
-        "usage": {
-            "config": {
-                "required": false
-            }
-        }
-    },
-    "ENABLE_CORS": {
-        "type": "boolean",
-        "default": 0,
-        "description": "Enable CORS Headers",
-        "containers": "apache2:firefly:walrus",
-        "usage": {
-            "config": {
-                "required": false
-            }
-        }
-    },
-    "ENABLE_XFRAME": {
-        "type": "boolean",
-        "default": 0,
-        "description": "Enable Xframe  Headers",
-        "containers": "apache2:firefly:walrus",
-        "usage": {
-            "config": {
-                "required": false
-            }
-        }
-    },
-    "REWRITE_CORS": {
-        "type": "boolean",
-        "default": 0,
-        "description": "Rewrite cors headers",
-        "containers": "apache2:firefly:walrus",
-        "usage": {
-            "config": {
-                "required": false
-            }
-        }
-    },
-    "REWRITE_DEFAULT": {
-        "type": "boolean",
-        "default": 0,
-        "description": "Use default rules, http to https",
-        "containers": "apache2:firefly:walrus",
-        "usage": {
-            "config": {
-                "required": false
-            }
-        }
-    },
-    "REWRITE_ENABLED": {
-        "type": "boolean",
-        "default": 0,
-        "description": "Activate rewrite rules from config",
-        "containers": "apache2:firefly:walrus",
-        "usage": {
-            "config": {
-                "required": false
-            }
-        }
-    },
     "APACHE_CONF": {
         "type": "path:single",
         "default": "/etc/apache2/conf-include",
@@ -365,17 +189,6 @@
             }
         }
     },
-    "APP_UPDATE_PATH": {
-        "type": "path:single",
-        "default": "",
-        "description": "Path to where app updates are stored",
-        "containers": "apache2:firefly:walrus",
-        "usage": {
-            "config": {
-                "required": false
-            }
-        }
-    },
     "APP_GROUP": {
         "type": "string",
         "default": "www-data",
@@ -415,6 +228,17 @@
             }
         }
     },
+    "APP_PARAMS": {
+        "type": "string",
+        "default": "",
+        "description": "Additional params to pass",
+        "containers": "firefly",
+        "usage": {
+            "ociectl": {
+                "required": true
+            }
+        }
+    },
     "APP_TYPE": {
         "type": "string",
         "default": "apache2",
@@ -429,54 +253,32 @@
             }
         }
     },
-    "REWRITE_EXCLUDE": {
-        "type": "string",
+    "APP_UPDATE_AUTO": {
+        "type": "boolean",
+        "default": 1,
+        "description": "Auto update app from APP_UPDATE_PATH",
+        "containers": "apache2:firefly:walrus",
+        "usage": {
+            "config": {
+                "required": false
+            }
+        }
+    },
+    "APP_UPDATE_FAIL": {
+        "type": "boolean",
+        "default": 0,
+        "description": "If app cannot update, should we fail to start",
+        "containers": "apache2:firefly:walrus",
+        "usage": {
+            "config": {
+                "required": false
+            }
+        }
+    },
+    "APP_UPDATE_PATH": {
+        "type": "path:single",
         "default": "",
-        "description": "Exclude from rewrite rules, regex/pattern",
-        "containers": "apache2:firefly:walrus",
-        "usage": {
-            "config": {
-                "required": false
-            }
-        }
-    },
-    "REWRITE_EXT": {
-        "type": "string",
-        "default": "",
-        "description": "Rewrite file extensions",
-        "containers": "apache2:firefly:walrus",
-        "usage": {
-            "config": {
-                "required": false
-            }
-        }
-    },
-    "REWRITE_INDEX": {
-        "type": "string",
-        "default": "",
-        "description": "Set framework rewrite e.g index.php",
-        "containers": "apache2:firefly:walrus",
-        "usage": {
-            "config": {
-                "required": false
-            }
-        }
-    },
-    "VADC_IP_ADDRESS": {
-        "type": "string",
-        "default": "10.0.0.0/8 172.16.0.0/12 192.168.0.0/16",
-        "description": "Use address rules, http to https",
-        "containers": "apache2:firefly:walrus",
-        "usage": {
-            "config": {
-                "required": false
-            }
-        }
-    },
-    "VADC_IP_HEADER": {
-        "type": "string",
-        "default": "X-Forwarded-For",
-        "description": "Path va vadc ip hea",
+        "description": "Path to where app updates are stored",
         "containers": "apache2:firefly:walrus",
         "usage": {
             "config": {
@@ -498,6 +300,193 @@
             }
         }
     },
+    "CA_ENABLED": {
+        "type": "boolean",
+        "default": 0,
+        "description": "Enable CA Import feature",
+        "containers": "all",
+        "usage": {
+            "cacerts": {
+                "required": true
+            }
+        }
+    },
+    "CA_FILTER": {
+        "type": "string",
+        "default": "*_CA.crt",
+        "description": "Filter to apply onto CA_PATH",
+        "containers": "all",
+        "usage": {
+            "cacerts": {
+                "required": true
+            }
+        }
+    },
+    "CA_PATH": {
+        "type": "path:single",
+        "default": "",
+        "description": "Path to where CA Certs are, prefixed with url: or file: , files must have .crt extension",
+        "containers": "all",
+        "usage": {
+            "cacerts": {
+                "required": true
+            }
+        }
+    },
+    "CA_UPDATE_AUTO": {
+        "type": "boolean",
+        "default": 1,
+        "description": "Auto update CA Certs",
+        "containers": "all",
+        "usage": {
+            "cacerts": {
+                "required": true
+            }
+        }
+    },
+    "CA_UPDATE_JVM": {
+        "type": "boolean",
+        "default": 0,
+        "description": "Update the JVM",
+        "containers": "all",
+        "usage": {
+            "cacerts": {
+                "required": true
+            }
+        }
+    },
+    "CA_UPDATE_OS": {
+        "type": "boolean",
+        "default": 0,
+        "description": "Update the OS Store",
+        "containers": "all",
+        "usage": {
+            "cacerts": {
+                "required": true
+            }
+        }
+    },
+    "CERT_ENABLED": {
+        "type": "boolean",
+        "default": 0,
+        "description": "Enable Keygen feature",
+        "containers": "all",
+        "usage": {
+            "keys": {
+                "required": true
+            }
+        }
+    },
+    "CERT_NAME": {
+        "type": "string",
+        "default": "server",
+        "description": "Name of keypair to use",
+        "containers": "all",
+        "usage": {
+            "keys": {
+                "required": false
+            }
+        }
+    },
+    "CERT_PATH": {
+        "type": "path:single",
+        "default": "/etc/ssl",
+        "description": "Path to where keypair should be store",
+        "containers": "all",
+        "usage": {
+            "keys": {
+                "required": false
+            }
+        }
+    },
+    "CERT_SIZE": {
+        "type": "integer",
+        "default": 2048,
+        "description": "Keysize of certificate",
+        "containers": "all",
+        "usage": {
+            "keys": {
+                "required": false
+            }
+        }
+    },
+    "CERT_SUBJECT": {
+        "type": "string",
+        "default": "localhost",
+        "description": "Subject of certificate",
+        "containers": "all",
+        "usage": {
+            "keys": {
+                "required": false
+            }
+        }
+    },
+    "CERT_TAG": {
+        "type": "string",
+        "default": "updated.keys",
+        "description": "A flag to use to detect how keys were created",
+        "containers": "all",
+        "usage": {
+            "keys": {
+                "required": false
+            }
+        }
+    },
+    "CERT_VALID": {
+        "type": "integer",
+        "default": 365,
+        "description": "Length in days for validity",
+        "containers": "all",
+        "usage": {
+            "keys": {
+                "required": false
+            }
+        }
+    },
+    "DH_PARAM_SIZE": {
+        "type": "integer",
+        "default": 2048,
+        "description": "DH Size to generate",
+        "containers": "all",
+        "usage": {
+            "dhparams": {
+                "required": true
+            }
+        }
+    },
+    "ENABLE_CORS": {
+        "type": "boolean",
+        "default": 0,
+        "description": "Enable CORS Headers",
+        "containers": "apache2:firefly:walrus",
+        "usage": {
+            "config": {
+                "required": false
+            }
+        }
+    },
+    "ENABLE_XFRAME": {
+        "type": "boolean",
+        "default": 0,
+        "description": "Enable Xframe  Headers",
+        "containers": "apache2:firefly:walrus",
+        "usage": {
+            "config": {
+                "required": false
+            }
+        }
+    },
+    "INTERNAL_DOMAIN": {
+        "type": "string",
+        "default": "",
+        "description": "Internal domain e.g example.local to be replaced in mail header",
+        "containers": "mantis",
+        "usage": {
+            "ociectl": {
+                "required": true
+            }
+        }
+    },
     "JAVA_HOME": {
         "type": "path:single",
         "default": "/opt/java",
@@ -507,17 +496,6 @@
             "build-arg": {
                 "required": true
             },
-            "ociectl": {
-                "required": true
-            }
-        }
-    },
-    "APP_PARAMS": {
-        "type": "string",
-        "default": "",
-        "description": "Additional params to pass",
-        "containers": "firefly",
-        "usage": {
             "ociectl": {
                 "required": true
             }
@@ -534,39 +512,6 @@
             }
         }
     },
-    "TOMCAT_NATIVE_LIBDIR": {
-        "type": "system",
-        "default": "${CATALINA_HOME}/native-jni-lib",
-        "description": "Path to tomcat native lib",
-        "containers": "firefly",
-        "usage": {
-            "build-arg": {
-                "required": true
-            }
-        }
-    },
-    "TOMCAT_VERSION": {
-        "type": "system",
-        "default": "${TOMCAT_VERSION}",
-        "description": "Tomcat Version",
-        "containers": "firefly",
-        "usage": {
-            "build-arg": {
-                "required": true
-            }
-        }
-    },
-    "INTERNAL_DOMAIN": {
-        "type": "string",
-        "default": "",
-        "description": "Internal domain e.g example.local to be replaced in mail header",
-        "containers": "mantis",
-        "usage": {
-            "ociectl": {
-                "required": true
-            }
-        }
-    },
     "MAIL_DOMAIN": {
         "type": "string",
         "default": "",
@@ -578,25 +523,14 @@
             }
         }
     },
-    "RELAY_CLIENTS": {
+    "PHP_ERROR_LOG": {
         "type": "string",
-        "default": "127.0.0.0/8 [::ffff:127.0.0.0]/104 [::1]/128",
-        "description": "Space seperated list of ip address allowed to relay",
-        "containers": "mantis",
+        "default": "${APACHE_LOG}/php_error.log",
+        "description": "PHP Error log file",
+        "containers": "walrus",
         "usage": {
-            "ociectl": {
-                "required": true
-            }
-        }
-    },
-    "RELAY_HOST": {
-        "type": "string",
-        "default": "",
-        "description": "The host where postfix should relay through e.g smtp.gmail.com",
-        "containers": "mantis",
-        "usage": {
-            "ociectl": {
-                "required": true
+            "config": {
+                "required": false
             }
         }
     },
@@ -615,17 +549,6 @@
         "type": "integer",
         "default": 60,
         "description": "PHP Max Input time",
-        "containers": "walrus",
-        "usage": {
-            "config": {
-                "required": false
-            }
-        }
-    },
-    "PHP_ERROR_LOG": {
-        "type": "string",
-        "default": "${APACHE_LOG}/php_error.log",
-        "description": "PHP Error log file",
         "containers": "walrus",
         "usage": {
             "config": {
@@ -688,6 +611,94 @@
             }
         }
     },
+    "RELAY_CLIENTS": {
+        "type": "string",
+        "default": "127.0.0.0/8 [::ffff:127.0.0.0]/104 [::1]/128",
+        "description": "Space seperated list of ip address allowed to relay",
+        "containers": "mantis",
+        "usage": {
+            "ociectl": {
+                "required": true
+            }
+        }
+    },
+    "RELAY_HOST": {
+        "type": "string",
+        "default": "",
+        "description": "The host where postfix should relay through e.g smtp.gmail.com",
+        "containers": "mantis",
+        "usage": {
+            "ociectl": {
+                "required": true
+            }
+        }
+    },
+    "REWRITE_ENABLED": {
+        "type": "boolean",
+        "default": 0,
+        "description": "Activate rewrite rules from config",
+        "containers": "apache2:firefly:walrus",
+        "usage": {
+            "config": {
+                "required": false
+            }
+        }
+    },
+    "REWRITE_CORS": {
+        "type": "boolean",
+        "default": 0,
+        "description": "Rewrite cors headers",
+        "containers": "apache2:firefly:walrus",
+        "usage": {
+            "config": {
+                "required": false
+            }
+        }
+    },
+    "REWRITE_DEFAULT": {
+        "type": "boolean",
+        "default": 0,
+        "description": "Use default rules, http to https",
+        "containers": "apache2:firefly:walrus",
+        "usage": {
+            "config": {
+                "required": false
+            }
+        }
+    },
+    "REWRITE_EXCLUDE": {
+        "type": "string",
+        "default": "",
+        "description": "Exclude from rewrite rules, regex/pattern",
+        "containers": "apache2:firefly:walrus",
+        "usage": {
+            "config": {
+                "required": false
+            }
+        }
+    },
+    "REWRITE_EXT": {
+        "type": "string",
+        "default": "",
+        "description": "Rewrite file extensions",
+        "containers": "apache2:firefly:walrus",
+        "usage": {
+            "config": {
+                "required": false
+            }
+        }
+    },
+    "REWRITE_INDEX": {
+        "type": "string",
+        "default": "",
+        "description": "Set framework rewrite e.g index.php",
+        "containers": "apache2:firefly:walrus",
+        "usage": {
+            "config": {
+                "required": false
+            }
+        }
+    },
     "SQL_VERSION": {
         "type": "string",
         "default": "${SQL_VERSION}",
@@ -696,6 +707,50 @@
         "usage": {
             "build-arg": {
                 "required": true
+            }
+        }
+    },
+    "TOMCAT_NATIVE_LIBDIR": {
+        "type": "system",
+        "default": "${CATALINA_HOME}/native-jni-lib",
+        "description": "Path to tomcat native lib",
+        "containers": "firefly",
+        "usage": {
+            "build-arg": {
+                "required": true
+            }
+        }
+    },
+    "TOMCAT_VERSION": {
+        "type": "system",
+        "default": "${TOMCAT_VERSION}",
+        "description": "Tomcat Version",
+        "containers": "firefly",
+        "usage": {
+            "build-arg": {
+                "required": true
+            }
+        }
+    },
+    "VADC_IP_ADDRESS": {
+        "type": "string",
+        "default": "10.0.0.0/8 172.16.0.0/12 192.168.0.0/16",
+        "description": "Use address rules, http to https",
+        "containers": "apache2:firefly:walrus",
+        "usage": {
+            "config": {
+                "required": false
+            }
+        }
+    },
+    "VADC_IP_HEADER": {
+        "type": "string",
+        "default": "X-Forwarded-For",
+        "description": "Header to use for client ip",
+        "containers": "apache2:firefly:walrus",
+        "usage": {
+            "config": {
+                "required": false
             }
         }
     }
