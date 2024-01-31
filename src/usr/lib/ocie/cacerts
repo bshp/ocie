@@ -25,7 +25,9 @@ function show_help()
 function auto_update()
 {
     update_os;
-    update_jvm;
+    if [[ ! -z "${JAVA_HOME}" ]];then
+        update_jvm;
+    fi;
 }
     
 function update_jvm()

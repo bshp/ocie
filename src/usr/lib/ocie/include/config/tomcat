@@ -54,5 +54,5 @@ echo "Ocie Config: Initialization complete";
 if [[ "${APP_OWNER}" == "root" ]];then
     echo "Ocie Config: App is set to run as [ root ], set APP_OWNER to change the account";
 else
-    echo "Ocie Config: The app will run as [ ${APP_OWNER} ] OR you can set set APP_OWNER to root and risk it for the biscuit";
+    echo "Ocie Config: The app will run as [ ${APP_OWNER} ] OR you can set APP_OWNER to root and risk it for the biscuit";
 fi;

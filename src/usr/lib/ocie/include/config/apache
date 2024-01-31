@@ -58,7 +58,7 @@ if [[ -f "${OCIE_HOME}/conf/ocie-apache.init" ]];then
     reset_config;
 fi;
     
-if [[ "${REWRITE_ENABLED}" == 1 ]];then
+if [[ "${REWRITE_ENABLED}" == 0 ]];then
     echo "Ocie Config: Rewrite is DISABLED, skipping";
     echo "Ocie: Set REWRITE_ENABLED=1 in order activate";
 else
@@ -109,7 +109,7 @@ if [[ ! "${APP_TYPE}" == "tomcat" ]];then
     if [[ "${APP_OWNER}" == "root" ]];then
         echo "Ocie Config: App is set to run as [ root ], set APP_OWNER to change the account";
     else
-        echo "Ocie Config: The app will run as [ ${APP_OWNER} ] OR you can set set APP_OWNER to root and risk it for the biscuit";
+        echo "Ocie Config: The app will run as [ ${APP_OWNER} ] OR you can set APP_OWNER to root and risk it for the biscuit";
     fi;
 fi;
 echo "#Apache Initialized" > ${OCIE_HOME}/conf/ocie-apache.init;
