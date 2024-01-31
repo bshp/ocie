@@ -105,11 +105,5 @@ if [[ ! "${APP_TYPE}" == "tomcat" ]];then
     echo "Ocie Config: Data directory for application is ${APP_DATA}";
     echo "Ocie Config: Apache Config Test PASSED, using updated configuration";
     echo "Ocie Config: Apache2 remoteip configured with [address: ${VADC_IP_ADDRESS}, header: ${VADC_IP_HEADER}]";
-    echo "Ocie Config: Initialization complete"
-    if [[ "${APP_OWNER}" == "root" ]];then
-        echo "Ocie Config: App is set to run as [ root ], set APP_OWNER to change the account";
-    else
-        echo "Ocie Config: The app will run as [ ${APP_OWNER} ] OR you can set APP_OWNER to root and risk it for the biscuit";
-    fi;
 fi;
 echo "#Apache Initialized" > ${OCIE_HOME}/conf/ocie-apache.init;

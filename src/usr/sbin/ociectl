@@ -109,6 +109,12 @@ function ocie_start()
     ocie_keys;
     ocie_config;
     ocie_update;
+    if [[ "${APP_OWNER}" == "root" ]];then
+        echo "Ocie: Application is set to run as [ root ], set APP_OWNER to change the account";
+    else
+        echo "Ocie: Application will run as [ ${APP_OWNER} ] OR you can set APP_OWNER to [ root ] and risk it for the biscuit";
+    fi;
+    echo "Ocie: Initialization complete, starting container";
     app_start;
 }
     

@@ -46,13 +46,7 @@ if [[ ! -z "${CATALINA_CFG}" ]];then
 fi;
     
 # Set ready
-echo "#Tomcat Initialized" > ${OCIE_HOME}/conf/ocie-tomcat.init;
 echo "Ocie Config: Tomcat Config Test PASSED, using updated configuration";
 echo "Ocie Config: Tomcat RemoteIpValve configured with [internalProxies: ${APP_PROXIES}, remoteIpHeader: ${VADC_IP_HEADER}]";
 echo "Ocie Config: Configured JAVA_OPTS with ${APP_OPTS}";
-echo "Ocie Config: Initialization complete";
-if [[ "${APP_OWNER}" == "root" ]];then
-    echo "Ocie Config: App is set to run as [ root ], set APP_OWNER to change the account";
-else
-    echo "Ocie Config: The app will run as [ ${APP_OWNER} ] OR you can set APP_OWNER to root and risk it for the biscuit";
-fi;
+echo "#Tomcat Initialized" > ${OCIE_HOME}/conf/ocie-tomcat.init;
