@@ -10,7 +10,7 @@ RSA_TAG=${CERT_TAG};
 OPENSSL_BIN=$(openssl version 2>&1 | grep -i -o 'Library: OpenSSL');
     
 if [[ -z "${OPENSSL_BIN}" ]];then
-    echo "Ocie: Unable to generate new keys, openssl not found";
+    echo "Ocie: Keygen: Unable to generate new keys, openssl not found";
     exit;
 fi;
     
@@ -46,7 +46,7 @@ function get_signature()
     #fi;
     TYPE=$(echo "${TYPE,,}" | tr -d ' ');
     for SIG in ${TYPE//,/ };do
-        echo "Ocie: ${SIG^^} Thumbprint:$(openssl x509 -noout -fingerprint -${SIG} -in ${CERT} | cut -f2 -d'=' | sed 's/://g' | awk '{print tolower($0)}')";
+        echo "Ocie: Keygen: ${SIG^^} Thumbprint:$(openssl x509 -noout -fingerprint -${SIG} -in ${CERT} | cut -f2 -d'=' | sed 's/://g' | awk '{print tolower($0)}')";
     done;
 }
     
@@ -76,9 +76,9 @@ if [[ -f "${RSA_PATH}/default.keys" ]];then
     DIRECT=1;
 fi;
 if [[ "${DIRECT}" == 1 ]] || [[ ! -f "${RSA_PATH}/${RSA_TAG}" ]];then
-    echo "Ocie: Generating new key pair";
+    echo "Ocie: Keygen: Generating new key pair";
     openssl req -newkey rsa:${RSA_SIZE} -x509 -nodes -keyout ${RSA_PATH}/${RSA_NAME}.key -new -out ${RSA_PATH}/${RSA_NAME}.pem -subj /CN=${RSA_CN} -sha256 -days ${RSA_VALID} &>/dev/null;
-    echo "Ocie: Keygen finished";
+    echo "Ocie: Keygen: Finished";
     get_signature "${RSA_PATH}/${RSA_NAME}.pem";
     echo "#Keygen generated" > ${RSA_PATH}/${RSA_TAG};
 fi;

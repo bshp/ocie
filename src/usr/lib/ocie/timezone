@@ -18,15 +18,15 @@ function add_zone()
     INVALID=$(echo "$ZONES" | grep -o "$1");
     #INVALID=$(ocie --validate "-test $ZONES -expect $1");
     if [[ -z "$INVALID" ]];then
-        echo "Ocie: Invalid Timezone [ $1 ]";
-        echo "Ocie: Timezones available:";
+        echo "Ocie: Timezone: Invalid zone specified, [ $1 ]";
+        echo "Ocie: Timezone: List of valid zones:";
         echo "${ZONES}";
     else
         sed -i '/^OS_TIMEZONE\=.*$/I d' /etc/environment
         ln -snf /usr/share/zoneinfo/$TZ /etc/localtime;
         echo "$TZ" > /etc/timezone;
         echo "OS_TIMEZONE=$TZ" >> /etc/environment;
-        echo "Ocie: Timezone updated to [ $1 ]";
+        echo "Ocie: Timezone: Zone updated, using [ $1 ]";
     fi;
 }
 

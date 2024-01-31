@@ -59,35 +59,34 @@ if [[ -f "${OCIE_HOME}/conf/ocie-apache.init" ]];then
 fi;
     
 if [[ "${REWRITE_ENABLED}" == 0 ]];then
-    echo "Ocie Config: Rewrite is DISABLED, skipping";
-    echo "Ocie: Set REWRITE_ENABLED=1 in order activate";
+    echo "Ocie: Config: Rewrite is DISABLED, set REWRITE_ENABLED=1 in order activate, skipping";
 else
     #Enable Rewrite Engine
     sed -i "s/#REWRITE/RewriteEngine On/g" "${APACHE_SITES}/000-default.conf";
     sed -i "s/#REWRITE/RewriteEngine On/g" "${APACHE_SITES}/default-ssl.conf";
     
     if [[ "${REWRITE_DEFAULT}" == 1 ]];then
-        echo "Ocie Config: Rewriting all requests to: [ https ]";
+        echo "Ocie: Config: Rewriting all requests to: [ https ]";
         add_default;
     fi;
     if [[ "${REWRITE_INDEX}" != "" ]];then
-        echo "Ocie Config: Rewriting all requests to: [ ${REWRITE_INDEX} ]";
+        echo "Ocie: Config: Rewriting all requests to: [ ${REWRITE_INDEX} ]";
         add_framework;
     fi;
     if [[ "${REWRITE_CORS}" == 1 ]];then
-        echo "Ocie Config: Adding CORS config for JSON to enabled site";
+        echo "Ocie: Config: Adding CORS config for JSON to enabled site";
         add_cors;
     fi;
     if [[ "${REWRITE_EXT}" != "" ]];then
         if [[ "${REWRITE_INDEX}" != "" ]];then
-            echo "Ocie Config: Cannot configure both [ REWRITE_INDEX ] and [ REWRITE_EXT ], using [ REWRITE_INDEX ], value ${REWRITE_INDEX}";
+            echo "Ocie: Config: Cannot configure both [ REWRITE_INDEX ] and [ REWRITE_EXT ], using [ REWRITE_INDEX ], value ${REWRITE_INDEX}";
         else
-            echo "Ocie Config: Rewriting all requests with the following extensions: [ ${REWRITE_EXT} ]";
+            echo "Ocie: Config: Rewriting all requests with the following extensions: [ ${REWRITE_EXT} ]";
             add_extension;
         fi;
     fi;
     if [[ "${REWRITE_EXCLUDE}" != "" ]];then
-        echo "Ocie Config: Ecluding the following pattern from rewrite: [ ${REWRITE_EXCLUDE} ]";
+        echo "Ocie: Config: Ecluding the following pattern from rewrite: [ ${REWRITE_EXCLUDE} ]";
         add_exclude;
     fi;
 fi;
@@ -97,13 +96,13 @@ fi;
 if [[ ! "${APP_TYPE}" == "tomcat" ]];then
     HTTPD_CFG=$(ociectl --test);
     if [[ ! -z "${HTTPD_CFG}" ]];then
-        echo "Ocie Config: Test FAILED, reverting changes";
-        echo "Ocie Config: Result: ${HTTPD_CFG}";
+        echo "Ocie: Config: Test FAILED, reverting changes";
+        echo "Ocie: Config: Result: ${HTTPD_CFG}";
         reset_config;
         exit 1;
     fi;
-    echo "Ocie Config: Data directory for application is ${APP_DATA}";
-    echo "Ocie Config: Apache Config Test PASSED, using updated configuration";
-    echo "Ocie Config: Apache2 remoteip configured with [address: ${VADC_IP_ADDRESS}, header: ${VADC_IP_HEADER}]";
+    echo "Ocie: Config: Data directory for application is ${APP_DATA}";
+    echo "Ocie: Config: Apache Config Test PASSED, using updated configuration";
+    echo "Ocie: Config: Apache2 remoteip configured with [address: ${VADC_IP_ADDRESS}, header: ${VADC_IP_HEADER}]";
 fi;
 echo "#Apache Initialized" > ${OCIE_HOME}/conf/ocie-apache.init;

@@ -6,7 +6,7 @@ DH_PATH=/etc/ssl;
 OPENSSL_BIN=$(openssl version 2>&1 | grep -i -o 'Library: OpenSSL');
     
 if [[ -z "${OPENSSL_BIN}" ]];then
-    echo "Ocie: Unable to generate dhparams, openssl not found";
+    echo "Ocie: DH Params: Unable to generate, openssl not found";
     exit;
 fi;
     
@@ -40,6 +40,6 @@ for cmds in "$@";do
     esac;
 done;
     
-echo "Ocie: Generating new DHE Params";
+echo "Ocie: DH Params: Generating new DHE Params";
 openssl dhparam -out ${DH_PATH}/${DH_NAME} ${DH_SIZE} &>/dev/null
-echo "Ocie: Finished generating new DHE params: file:${DH_PATH}/${DH_NAME}";
+echo "Ocie: DH Params: Finished generating new DHE params: file:${DH_PATH}/${DH_NAME}";
