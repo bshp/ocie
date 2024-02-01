@@ -46,7 +46,7 @@ function get_signature()
     #fi;
     TYPE=$(echo "${TYPE,,}" | tr -d ' ');
     for SIG in ${TYPE//,/ };do
-        echo "Ocie: Keygen: ${SIG^^} Thumbprint:$(openssl x509 -noout -fingerprint -${SIG} -in ${CERT} | cut -f2 -d'=' | sed 's/://g' | awk '{print tolower($0)}')";
+        echo "Ocie: Keygen: ${SIG^^} Thumbprint: $(openssl x509 -noout -fingerprint -${SIG} -in ${CERT} | cut -f2 -d'=' | tr -d ':' | tr '[:upper:]' '[:lower:]')";
     done;
 }
     

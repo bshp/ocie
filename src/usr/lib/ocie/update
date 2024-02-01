@@ -6,12 +6,13 @@ function get_signature()
     object="$2";
     if [[ -d "${object}" ]];then
         set_metadata "${option}" "${object}";
-        echo "$(sha1sum ${APP_CACHE}/${APP_NAME}.${option}.metadata | awk '{print $1}')";
+        result="$(sha1sum ${APP_CACHE}/${APP_NAME}.${option}.metadata)";
     elif [[ -f "${object}" ]];then
-        echo "$(sha1sum ${object} | awk '{print $1}')";
+        result="$(sha1sum ${object})";
     else
-        echo "0";
+        result="0";
     fi;
+    echo "${result%% *}";
 }
     
 function set_metadata()
