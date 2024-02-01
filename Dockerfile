@@ -15,6 +15,7 @@ ARG TZ
     
 ENV OCIE_HOME=/etc/ocie
 ENV OCIE_LIB=/usr/lib/ocie
+ENV OCIE_LOG=/var/log/ocie
     
 # Set defaults
 ##############################
@@ -22,7 +23,8 @@ ENV APP_NAME="default"
 ENV APP_PARAMS=""
 ENV APP_TYPE=""
 ENV APP_CACHE=/var/cache
-ENV APP_DATA=/srv/${APP_NAME}
+ENV APP_HOME=""
+ENV APP_DATA=""
 ENV APP_GROUP=""
 ENV APP_OWNER=""
 ##############################
@@ -68,7 +70,7 @@ RUN <<-"EOD" bash
     echo ". /etc/environment" >> /etc/bash.bashrc;
     echo "Ocie: Setting up system";
     echo "Ocie: Creating container account, [ ocie ]";
-    mkdir -p ${OCIE_HOME}/conf;
+    mkdir -p ${OCIE_HOME}/conf ${OCIE_LOG};
     useradd -d ${OCIE_HOME} -r -s /bin/bash ocie;
     install -d -m 0775 -o ocie -g ocie ${OCIE_HOME};
     # Install base packages, timezone

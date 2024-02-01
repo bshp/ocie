@@ -33,9 +33,9 @@ function app_config()
     ${OCIE_LIB}/config;
 }
     
-function app_update()
+function app_deploy()
 {
-    ${OCIE_LIB}/update;
+    ${OCIE_LIB}/deploy;
 }
     
 function app_test()

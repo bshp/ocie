@@ -77,11 +77,11 @@ function ocie_keys()
     fi;
 }
     
-function ocie_update()
+function ocie_deploy()
 {
     if [[ "${APP_DEPLOY}" == 1 ]];then
-        if [[ $(type -t app_update) == function ]];then
-            app_update;
+        if [[ $(type -t app_deploy) == function ]];then
+            app_deploy;
         fi;
     else
         echo "Ocie: App Deployment/Update is DISABLED, set APP_DEPLOY=1 in order activate, skipping..";
@@ -105,7 +105,7 @@ function ocie_start()
     ocie_certs;
     ocie_keys;
     ocie_config;
-    ocie_update;
+    ocie_deploy;
     if [[ "${APP_OWNER}" == "root" ]];then
         echo "Ocie: Application is set to run as [ root ], set APP_OWNER to change the account";
     else
