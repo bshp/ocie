@@ -35,7 +35,7 @@ else
     deploy_latest="${APP_UPDATE_PATH}/${APP_NAME}";
     if [[ "${APP_TYPE}" == "tomcat" ]];then
         deploy_local="${deploy_local}/${APP_NAME}.war";
-        deploy_latest="${deploy_latest}.war";
+        deploy_latest="${APP_UPDATE_PATH}/${APP_NAME}.war";
     fi;
     echo "Ocie: App Deploy: Deployment type is [ ${APP_TYPE} ]";
     if [[ ! -d "${APP_DATA}" ]]; then
