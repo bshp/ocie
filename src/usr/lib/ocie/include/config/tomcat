@@ -18,7 +18,8 @@ function tomcat_set_env()
 {
     echo "export JAVA_OPTS=\"${JAVA_OPTS} ${APP_PARAMS}\"" > ${CATALINA_HOME}/bin/setenv.sh
     echo "export VADC_IP_REG=\"${APP_PROXIES}\"" >> ${CATALINA_HOME}/bin/setenv.sh
-    chmod -R 0755 "${CATALINA_HOME}/bin/setenv.sh";
+    chown tomcat:tomcat "${CATALINA_HOME}/bin/setenv.sh";
+    chmod a+x "${CATALINA_HOME}/bin/setenv.sh";
 }
 
 function tomcat_server_cfg()
@@ -48,5 +49,5 @@ fi;
 # Set ready
 echo "Ocie Config: Tomcat Config Test PASSED, using updated configuration";
 echo "Ocie Config: Tomcat RemoteIpValve configured with [internalProxies: ${APP_PROXIES}, remoteIpHeader: ${VADC_IP_HEADER}]";
-echo "Ocie Config: Configured JAVA_OPTS with ${APP_OPTS}";
+echo "Ocie Config: Configured JAVA_OPTS with ${APP_PARAMS}";
 echo "#Tomcat Initialized" > ${OCIE_HOME}/conf/ocie-tomcat.init;
