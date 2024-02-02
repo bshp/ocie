@@ -9,11 +9,11 @@ function get_signature()
     fi;
     if [[ ! "${option}" == "sha1" ]] && [[ ! "${option}" == "sha256" ]];then
         option='sha1';
-        if [[ -d "${object}" ]];then
-            echo "$(find ${object} -type f -print0 | xargs -0 sha1sum | sort | sha1sum | cut -f1 -d' ')";
-        else
-            echo "$(${option}sum ${object} | cut -f1 -d' ')";
-        fi;
+    fi;
+    if [[ -d "${object}" ]];then
+        echo "$(find ${object} -type f -print0 | xargs -0 sha1sum | sort | sha1sum | cut -f1 -d' ')";
+    elif [[ -f "${object}" ]];then
+        echo "$(${option}sum ${object} | cut -f1 -d' ')";
     else
         echo "0";
     fi;

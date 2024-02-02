@@ -69,7 +69,7 @@ else
         echo "Ocie: Config: Rewriting all requests to: [ https ]";
         add_default;
     fi;
-    if [[ "${REWRITE_INDEX}" != "" ]];then
+    if [[ ! "${REWRITE_INDEX}" == "" ]];then
         echo "Ocie: Config: Rewriting all requests to: [ ${REWRITE_INDEX} ]";
         add_framework;
     fi;
@@ -77,15 +77,15 @@ else
         echo "Ocie: Config: Adding CORS config for JSON to enabled site";
         add_cors;
     fi;
-    if [[ "${REWRITE_EXT}" != "" ]];then
-        if [[ "${REWRITE_INDEX}" != "" ]];then
+    if [[ ! "${REWRITE_EXT}" == "" ]];then
+        if [[ ! "${REWRITE_INDEX}" = "" ]];then
             echo "Ocie: Config: Cannot configure both [ REWRITE_INDEX ] and [ REWRITE_EXT ], using [ REWRITE_INDEX ], value ${REWRITE_INDEX}";
         else
             echo "Ocie: Config: Rewriting all requests with the following extensions: [ ${REWRITE_EXT} ]";
             add_extension;
         fi;
     fi;
-    if [[ "${REWRITE_EXCLUDE}" != "" ]];then
+    if [[ ! "${REWRITE_EXCLUDE}" == "" ]];then
         echo "Ocie: Config: Ecluding the following pattern from rewrite: [ ${REWRITE_EXCLUDE} ]";
         add_exclude;
     fi;
