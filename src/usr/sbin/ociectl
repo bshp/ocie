@@ -106,10 +106,15 @@ function ocie_start()
     ocie_keys;
     ocie_config;
     ocie_deploy;
-    if [[ "${APP_OWNER}" == "root" ]];then
+    RUNAS="${APP_OWNER}";
+    # DISA STIG V-222986, Tomcat owner is root but runas is tomcat
+    if [[ "${APP_TYPE}" == "tomcat" ]];then
+        RUNAS="tomcat";
+    fi;
+    if [[ "${RUNAS}" == "root" ]];then
         echo "Ocie: Application is set to run as [ root ], set APP_OWNER to change the account";
     else
-        echo "Ocie: Application will run as [ ${APP_OWNER} ] OR you can set APP_OWNER to [ root ] and risk it for the biscuit";
+        echo "Ocie: Application will run as [ ${RUNAS} ] OR you can set APP_OWNER to [ root ] and risk it for the biscuit";
     fi;
     echo "Ocie: Initialization complete, starting container";
     app_start;

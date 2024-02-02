@@ -18,7 +18,7 @@ function tomcat_set_env()
 {
     echo "export JAVA_OPTS=\"${JAVA_OPTS} ${APP_PARAMS}\"" > ${CATALINA_HOME}/bin/setenv.sh
     echo "export VADC_IP_REG=\"${APP_PROXIES}\"" >> ${CATALINA_HOME}/bin/setenv.sh
-    chown tomcat:tomcat "${CATALINA_HOME}/bin/setenv.sh";
+    chown ${APP_OWNER}:${APP_GROUP} "${CATALINA_HOME}/bin/setenv.sh";
     chmod a+x "${CATALINA_HOME}/bin/setenv.sh";
 }
 
