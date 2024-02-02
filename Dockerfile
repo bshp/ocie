@@ -27,7 +27,6 @@ ENV APP_NAME="default" \
     APP_GROUP="" \
     APP_OWNER="" \
     APP_DEPLOY=0 \
-    APP_UPDATE_AUTO=1 \
     APP_UPDATE_PATH="" \
     APP_UPDATE_STRICT=0 \
     CA_ENABLED=0 \
