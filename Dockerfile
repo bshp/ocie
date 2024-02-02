@@ -16,7 +16,6 @@ ARG TZ
 ENV OCIE_HOME=/etc/ocie \
     OCIE_LIB=/usr/lib/ocie \
     OCIE_LOG=/var/log/ocie
-    
 # Set defaults
 ##############################
 ENV APP_NAME="default" \
