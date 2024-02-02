@@ -14,44 +14,39 @@ ARG OS_VERSION
 ARG TZ
     
 ENV OCIE_HOME=/etc/ocie
-ENV OCIE_LIB=/usr/lib/ocie
-ENV OCIE_LOG=/var/log/ocie
+    OCIE_LIB=/usr/lib/ocie
+    OCIE_LOG=/var/log/ocie
     
 # Set defaults
 ##############################
 ENV APP_NAME="default"
-ENV APP_PARAMS=""
-ENV APP_TYPE=""
-ENV APP_CACHE=/var/cache
-ENV APP_HOME=""
-ENV APP_DATA=""
-ENV APP_GROUP=""
-ENV APP_OWNER=""
-##############################
-ENV APP_DEPLOY=0
-ENV APP_UPDATE_AUTO=1
-ENV APP_UPDATE_PATH=""
-ENV APP_UPDATE_STRICT=0
-##############################
-ENV CA_ENABLED=0
-ENV CA_PATH=""
-ENV CA_FILTER="*_CA.crt"
-ENV CA_UPDATE_AUTO=1
-ENV CA_UPDATE_JVM=0
-ENV CA_UPDATE_OS=0
-##############################
-ENV CERT_ENABLED=0
-ENV CERT_NAME="server"
-ENV CERT_PATH=/etc/ssl
-ENV CERT_SUBJECT="localhost"
-ENV CERT_SIZE=2048
-ENV CERT_VALID=365
-ENV CERT_TAG="updated.keys"
-##############################
-ENV DH_PARAM_SIZE=2048
-##############################
-ENV VADC_IP_ADDRESS="10.0.0.0/8 172.16.0.0/12 192.168.0.0/16"
-ENV VADC_IP_HEADER="X-Forwarded-For"
+    APP_PARAMS=""
+    APP_TYPE=""
+    APP_CACHE=/var/cache
+    APP_HOME=""
+    APP_DATA=""
+    APP_GROUP=""
+    APP_OWNER=""
+    APP_DEPLOY=0
+    APP_UPDATE_AUTO=1
+    APP_UPDATE_PATH=""
+    APP_UPDATE_STRICT=0
+    CA_ENABLED=0
+    CA_PATH=""
+    CA_FILTER="*_CA.crt"
+    CA_UPDATE_AUTO=1
+    CA_UPDATE_JVM=0
+    CA_UPDATE_OS=0
+    CERT_ENABLED=0
+    CERT_NAME="server"
+    CERT_PATH=/etc/ssl
+    CERT_SUBJECT="localhost"
+    CERT_SIZE=2048
+    CERT_VALID=365
+    CERT_TAG="updated.keys"
+    DH_PARAM_SIZE=2048
+    VADC_IP_ADDRESS="10.0.0.0/8 172.16.0.0/12 192.168.0.0/16"
+    VADC_IP_HEADER="X-Forwarded-For"
     
 # Add Ocie
 COPY --chown=root:root --chmod=0755 ./src/ ./
