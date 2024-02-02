@@ -4,7 +4,7 @@ on:
     branches: [ main ]
     paths-ignore:
       - '.gitignore'
-      - 'README.md'
+      - '**.md'
   schedule:
     - cron:  '15 0 * * 0'
 env:
