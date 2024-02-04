@@ -1,5 +1,5 @@
 #!/bin/bash
-set -euf;
+set -ef;
     
 function show_help()
 {
@@ -53,6 +53,8 @@ function show_help()
    echo "       -dirs     Comma seperated list of directories to forcefully delete";
    echo
    echo "--print    Print system config";
+   echo
+   echo "--quiet    Silence output";
 }
     
 function get_environment()
@@ -61,7 +63,7 @@ function get_environment()
     printf "%s" "$(</etc/environment)";
     echo
     echo "Ocie: Package Manifest";
-    $OCIE_LIB/pkg --print;
+    . $OCIE_LIB/pkg --print;
 }
     
 function format_args()
@@ -71,6 +73,8 @@ function format_args()
 }
     
 ENTRIES=();
+SILENT=0;
+    
 for i in "$@";do
     shift
     case "$i" in
@@ -88,11 +92,15 @@ for i in "$@";do
             ENTRIES+=(["5"]="clean $(format_args " $1")");;
         '--print') 
             ENTRIES+=(["6"]="print");;
-        '--help') 
+        '--quiet')
+            SILENT=1;;
+        '--help')
             show_help;;
         *);;
     esac;
 done;
+    
+. ${OCIE_LIB}/include/utils;
     
 CMDS=$(<<< ${!ENTRIES[@]} tr ' ' '\n' | sort);
 for key in $CMDS;do
@@ -100,11 +108,14 @@ for key in $CMDS;do
     CMD="$(echo ${ENTRY%% *})";
     PARAMS="$(echo ${ENTRY#* })";
     if [[ -f "${OCIE_LIB}/${CMD}" ]];then
+        #print_msg "Ocie: Executing [ $CMD ], with arguments: [ $PARAMS ]";
+        #. $OCIE_LIB/$CMD $PARAMS | print_msg
         echo "Ocie: Executing [ $CMD ], with arguments: [ $PARAMS ]";
-        $OCIE_LIB/$CMD $PARAMS
+        . $OCIE_LIB/$CMD $PARAMS
     elif [[ "${CMD}" == "print" ]];then
         get_environment;
     else
+        #print_msg "Ocie: Uknown option passed: [ $CMD ], use --help for more info";
         echo "Ocie: Uknown option passed: [ $CMD ], use --help for more info";
     fi;
 done;

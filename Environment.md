@@ -618,6 +618,17 @@
     }
   },
   "Mantis": {
+    "HOSTNAME": {
+      "type": "string",
+      "default": "docker sets random if not specified",
+      "description": "The servers identity, e.g smtp.example.com",
+      "containers": "mantis",
+      "usage": {
+        "ociectl": {
+          "required": true
+        }
+      }
+    },
     "INTERNAL_DOMAIN": {
       "type": "string",
       "default": "",
@@ -629,21 +640,10 @@
         }
       }
     },
-    "MAIL_DOMAIN": {
+    "MY_NETWORKS": {
       "type": "string",
-      "default": "",
-      "description": "Domain e.g example.com",
-      "containers": "mantis",
-      "usage": {
-        "ociectl": {
-          "required": true
-        }
-      }
-    },
-    "RELAY_CLIENTS": {
-      "type": "string",
-      "default": "127.0.0.0/8 [::ffff:127.0.0.0]/104 [::1]/128",
-      "description": "Space seperated list of ip address allowed to relay",
+      "default": "127.0.0.0/8",
+      "description": "Append MY_NETWORKS value to default, space seperated list of ip address allowed to relay",
       "containers": "mantis",
       "usage": {
         "ociectl": {

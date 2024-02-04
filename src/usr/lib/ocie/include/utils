@@ -1,5 +1,27 @@
 #!/bin/bash
     
+# This utils helper should be sourced, e.g  . ${OCIE_LIB}/include/utils
+# Print/Log/Output Message OR mute if OCIE_SILENT=1, e.g --quiet
+function print_msg()
+{
+    if [[ ! -z "$1" ]];then
+        if [[ ! "${OCIE_SILENT}" == 1 ]];then
+            echo "$1";
+        else
+            echo "$1" >> ${OCIE_LOG}/console-$(date '+%Y-%m').log
+        fi;
+    else
+        while IFS= read -r line;do
+            if [[ ! "${OCIE_SILENT}" == 1 ]];then
+                echo "$line";
+            else
+                echo "$line" >> ${OCIE_LOG}/console-$(date '+%Y-%m').log
+            fi;
+        done;
+    fi;
+}
+    
+# Get sha1 OR sha256 signature of directory/file, default: sha1
 function get_signature()
 {
     object="$1";
