@@ -157,6 +157,20 @@
         }
       }
     },
+    "APP_ENV": {
+      "type": "string",
+      "default": "prod",
+      "description": "Evironment type, to mute/skip some warnings, valid types: [ 'dev' | 'prod' ]",
+      "containers": "all",
+      "usage": {
+        "config": {
+          "required": false
+        },
+        "ociectl": {
+          "required": true
+        }
+      }
+    },
     "APP_GROUP": {
       "type": "string",
       "default": "www-data",
@@ -215,6 +229,20 @@
       "usage": {
         "config": {
           "required": true
+        },
+        "ociectl": {
+          "required": true
+        }
+      }
+    },
+    "APP_VOLS": {
+      "type": "path",
+      "default": "",
+      "description": "Define expected volumes that should be mapped, colon ':' seperated, e.g /srv/config:/srv/data",
+      "containers": "all",
+      "usage": {
+        "config": {
+          "required": false
         },
         "ociectl": {
           "required": true
