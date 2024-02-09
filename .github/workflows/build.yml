@@ -39,17 +39,17 @@ jobs:
         docker push bshp/ocie:${{env.BETA_CHANNEL}}
     - name: Dispatch Events
       run: |
-        data="'{\"ref\":\"main\"}'";
+        data="main";
         inheritees="apache2,ezproxy,mantis,unifi";
         for inheritee in ${inheritees//,/ };do 
             echo "Sending event to [ bshp/${inheritee} ]";
             if [[ "${inheritee}" == "apache2" ]];then
-                data="'{\"ref\":\"master\"}'";
+                data="master";
             fi;
             curl -L -X POST \
             -H "Accept: application/vnd.github+json" \
             -H "Authorization: ${{secrets.WF_TOKEN}}" \
             -H "X-GitHub-Api-Version: 2022-11-28" \
             https://api.github.com/repos/bshp/${inheritee}/actions/workflows/build.yml/dispatches \
-            -d "${data}";
+            -d "{\"ref\": \"${data}\"}"
         done;
