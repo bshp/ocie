@@ -40,10 +40,33 @@ function show_help()
     echo
 }
     
+function check_volumes()
+{
+    if [[ ! -z "${APP_VOLS}" ]];then
+        echo "Ocie: Application has defined volumes";
+        unmapped="";
+        vols=$(cat /proc/mounts);
+        for vol in ${APP_VOLS//:/ };do
+            mounted=$(echo "$vols" | grep -Eo ".*${vol}.*$");
+            if [[ ! -z "${mounted}" ]];then
+                echo "Ocie: Application volume [ ${vol} ] is NOT mapped";
+                unmapped+="${vol}, ";
+            fi;
+        done;
+        if [[ ! -z "${unmapped}" == 1 ]];then
+            echo "Ocie: Application needs to store persistant data and the volumes listed are not mapped:";
+            echo "  Unmapped Volumes: [ ${unmapped%, } ]";
+            echo "Ocie: Each volume should be mapped at runtime , e.g --volume my_vol:/example/path";
+            echo "Ocie: If this is a development environment, set --env|-e APP_ENV='dev' to mute this warning";
+        fi;
+    fi;
+}
+    
 function ocie_shutdown()
 {
-    echo "Ocie: Recieved stop signal, shutting down";
+    echo "Ocie: Recieved stop signal, attemtping to terminate application gracefully";
     app_shutdown;
+    echo "Ocie: Application stopped with exit code [ $? ], shutting down..";
     exit 0;
 }
     
@@ -109,23 +132,7 @@ function ocie_start()
     ocie_deploy;
     RUNAS="${APP_OWNER}";
     if [[ "${APP_ENV}" == "prod" ]];then
-        if [[ ! -z "${APP_VOLS}" ]];then
-            echo "Ocie: Application has defined volumes";
-            unmapped=0;
-            vols=$(cat /proc/mounts);
-            for vol in ${APP_VOLS//:/ };do
-                mounted=$(echo "$vols" | grep -Eo ".*${vol}.*$");
-                if [[ ! -z "${mounted}" ]];then
-                    unmapped=1;
-                    echo "Ocie: Application volume [ ${vol} ] is NOT mapped";
-                fi;
-            done;
-            if [[ "${unmapped}" == 1 ]];then
-                echo "Ocie: Application needs to store persistant data and one or more volumes are not mapped";
-                echo "Ocie: Each volume should be mapped at runtime , e.g --volume my_vol:/example/path";
-                echo "Ocie: If this is a development environment, set --env|-e APP_ENV='dev' to mute this warning";
-            fi;
-        fi;
+        check_volumes;
     fi;
     # DISA STIG V-222986, Tomcat owner is root but runas is tomcat
     if [[ "${APP_TYPE}" == "tomcat" ]];then
