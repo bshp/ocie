@@ -39,10 +39,10 @@ jobs:
         docker push bshp/ocie:${{env.BETA_CHANNEL}}
     - name: Dispatch Events
       run: |
-        data="main";
         inheritees="apache2,ezproxy,mantis,unifi";
         for inheritee in ${inheritees//,/ };do 
             echo "Sending event to [ bshp/${inheritee} ]";
+            data="main";
             if [[ "${inheritee}" == "apache2" ]];then
                 data="master";
             fi;
