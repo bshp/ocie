@@ -21,6 +21,12 @@ jobs:
         DOCKER_TOKEN: ${{secrets.DOCKER_TOKEN}}
       run: |
         docker login -u $DOCKER_USER -p $DOCKER_TOKEN
+    - name: Build 20.04
+      run: |
+        docker build . --pull --build-arg OS_VERSION=20.04 --tag bshp/ocie:20.04 --no-cache
+    - name: Push 20.04
+      run: |
+        docker push bshp/ocie:20.04
     - name: Build 22.04
       run: |
         docker build . --pull --build-arg OS_VERSION=${{env.STABLE_CHANNEL}} --tag bshp/ocie:latest --no-cache

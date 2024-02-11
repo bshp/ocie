@@ -31,6 +31,9 @@ function set_manifest()
     if [[ -f /bin/jq ]];then
         DB="$(mktemp -d)";
         cp /var/lib/dpkg/status $DB/ >/dev/null 2>&1;
+        if [[ -d /var/lib/dpkg/updates ]];then
+            cp -R /var/lib/dpkg/updates $DB/ >/dev/null 2>&1;
+        fi;
         sed -i 's/"//g' $DB/status >/dev/null 2>&1;
         DPKG_FORMAT='\{\"name\"\:\"${binary:Package}\"\,\"version\"\:\"${Version}\"\,\"summary\"\:\"${binary:Summary}\"\,\"maintainer\"\:\"${Maintainer}\"\}\,';
         DPKG_LIST=$(dpkg-query -W --admindir=$DB -f=$DPKG_FORMAT);
