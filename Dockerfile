@@ -53,6 +53,8 @@ COPY --chown=root:root --chmod=0755 ./src/ ./
     
 RUN <<-"EOD" bash
     set -eu;
+    # Set default shell to /bin/bash
+    ln -sf /bin/bash /bin/sh;
     echo "Ocie: Setting up environment";
     echo "OCIE_BIN=/usr/sbin" >> /etc/environment;
     echo "OCIE_HOME=${OCIE_HOME}" >> /etc/environment;
