@@ -1,5 +1,6 @@
 #### Docker Ocie Image  
-Base image we use for our containers
+Base image we use for our containers, Ocie itself is just a helper utility.    
+Default shell for Ubuntu is /bin/dash, this image sets /bin/sh to /bin/bash
     
 Note: no support provided, released on github for automated builds and registry publishing :D
     
@@ -7,7 +8,7 @@ Note: no support provided, released on github for automated builds and registry 
 'ocie' - makes it simple to setup a container without a ton of lines in a Dockerfile    
 'ociectl' - run/start/stop/reload the application without having to write entrypoint scripts, a standardized entrpoint for all your containers, e.g 
 ````
-ENTRYPOINT ["/usr/sbin/ociectl", "run"]
+ENTRYPOINT ["/usr/sbin/ociectl", "--run"]
 ````
 Info:    
 [https://github.com/bshp/ocie/tree/main/src](https://github.com/bshp/ocie/tree/main/src)
