@@ -72,8 +72,8 @@ function format_args()
     echo "${result}";
 }
     
-local entries=();
-local silent=0;
+entries=();
+silent=0;
     
 for i in "$@";do
     shift
@@ -102,11 +102,11 @@ done;
     
 . ${OCIE_LIB}/include/utils;
     
-local cmds=$(<<< ${!entries[@]} tr ' ' '\n' | sort);
+cmds=$(<<< ${!entries[@]} tr ' ' '\n' | sort);
 for key in $cmds;do
-    local entry="$(echo ${entries[$key]})";
-    local cmd="$(echo ${entry%% *})";
-    local params="$(echo ${entry#* })";
+    entry="$(echo ${entries[$key]})";
+    cmd="$(echo ${entry%% *})";
+    params="$(echo ${entry#* })";
     if [[ -f "${OCIE_LIB}/${cmd}" ]];then
         #print_msg "Ocie: Executing [ ${cmd} ], with arguments: [ ${params} ]";
         #. ${OCIE_LIB}/${cmd} ${params} | print_msg

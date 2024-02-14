@@ -93,7 +93,7 @@ fi;
 # Test config and print results
 # Tomcat sources this script, only print if apache
 if [[ ! "${APP_TYPE}" == "tomcat" ]];then
-    local httpd_cfg=$(ociectl --test);
+    httpd_cfg=$(ociectl --test);
     if [[ ! -z "${httpd_cfg}" ]];then
         echo "Ocie: Config: Test FAILED, reverting changes";
         echo "Ocie: Config: Result: ${httpd_cfg}";

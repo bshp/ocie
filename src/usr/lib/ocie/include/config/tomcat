@@ -3,7 +3,7 @@
 . ${OCIE_LIB}/include/config/apache;
     
 # Tomcat specific
-local app_proxies="$(echo ${VADC_IP_ADDRESS// /|} | sed 's/\./\\./g' | sed 's|\/|\\/|g')";
+app_proxies="$(echo ${VADC_IP_ADDRESS// /|} | sed 's/\./\\./g' | sed 's|\/|\\/|g')";
 if [[ -f "${OCIE_HOME}/conf/ocie-tomcat.init" ]];then
     reset_config;
 fi;
@@ -38,7 +38,7 @@ tomcat_set_env;
 apache_mod_jk;
     
 # Ensure config is valid
-local catalina_cfg=$(ociectl --test);
+catalina_cfg=$(ociectl --test);
 if [[ ! -z "${catalina_cfg}" ]];then
     echo "Ocie Config: Tomcat config test FAILED, reverting changes";
     echo "Ocie Config: Result: ${catalina_cfg}";
