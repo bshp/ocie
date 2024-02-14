@@ -3,7 +3,7 @@
 . ${OCIE_LIB}/include/config/apache;
     
 # Tomcat specific
-APP_PROXIES="$(echo ${VADC_IP_ADDRESS// /|} | sed 's/\./\\./g' | sed 's|\/|\\/|g')";
+local app_proxies="$(echo ${VADC_IP_ADDRESS// /|} | sed 's/\./\\./g' | sed 's|\/|\\/|g')";
 if [[ -f "${OCIE_HOME}/conf/ocie-tomcat.init" ]];then
     reset_config;
 fi;
@@ -13,15 +13,15 @@ function apache_mod_jk()
     cp "${APACHE_MODS}/jk.conf.dist" "${APACHE_MODS}/jk.conf" >/dev/null 2>&1;
     cp "${APACHE_MODS}/jk.load.dist" "${APACHE_MODS}/jk.load" >/dev/null 2>&1;
 }
-
+    
 function tomcat_set_env()
 {
     echo "export JAVA_OPTS=\"${JAVA_OPTS} ${APP_PARAMS}\"" > ${CATALINA_HOME}/bin/setenv.sh
-    echo "export VADC_IP_REG=\"${APP_PROXIES}\"" >> ${CATALINA_HOME}/bin/setenv.sh
+    echo "export VADC_IP_REG=\"${app_proxies}\"" >> ${CATALINA_HOME}/bin/setenv.sh
     chown ${APP_OWNER}:${APP_GROUP} "${CATALINA_HOME}/bin/setenv.sh";
     chmod a+x "${CATALINA_HOME}/bin/setenv.sh";
 }
-
+    
 function tomcat_server_cfg()
 {
     if [[ -f "${CATALINA_HOME}/conf/server.xml" ]];then
@@ -31,23 +31,23 @@ function tomcat_server_cfg()
         cp "${CATALINA_HOME}/conf/server.xml.dist" "${CATALINA_HOME}/conf/server.xml" >/dev/null 2>&1;
     fi;
 }
-
+    
 # Set environment 
 tomcat_set_env;
 # Enable libapache2-mod-jk
 apache_mod_jk;
     
 # Ensure config is valid
-CATALINA_CFG=$(ociectl --test);
-if [[ ! -z "${CATALINA_CFG}" ]];then
+local catalina_cfg=$(ociectl --test);
+if [[ ! -z "${catalina_cfg}" ]];then
     echo "Ocie Config: Tomcat config test FAILED, reverting changes";
-    echo "Ocie Config: Result: ${CATALINA_CFG}";
+    echo "Ocie Config: Result: ${catalina_cfg}";
     reset_config;
     exit 1;
 fi;
     
 # Set ready
 echo "Ocie Config: Tomcat Config Test PASSED, using updated configuration";
-echo "Ocie Config: Tomcat RemoteIpValve configured with [internalProxies: ${APP_PROXIES}, remoteIpHeader: ${VADC_IP_HEADER}]";
+echo "Ocie Config: Tomcat RemoteIpValve configured with [internalProxies: ${app_proxies}, remoteIpHeader: ${VADC_IP_HEADER}]";
 echo "Ocie Config: Configured JAVA_OPTS with ${APP_PARAMS}";
 echo "#Tomcat Initialized" > ${OCIE_HOME}/conf/ocie-tomcat.init;

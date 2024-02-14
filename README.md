@@ -1,6 +1,6 @@
 #### Docker Ocie Image  
-Base image we use for our containers, Ocie itself is just a helper utility.    
-Default shell for Ubuntu is /bin/dash, this image sets /bin/sh to /bin/bash
+Base image we use for our containers, Ocie itself is just an overlay utility.    
+Default shell, symlink for /bin/sh, in Ubuntu is /bin/dash, this image chages the symlink to /bin/bash
     
 Note: no support provided, released on github for automated builds and registry publishing :D
     

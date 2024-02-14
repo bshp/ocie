@@ -29,8 +29,7 @@ function add_cors()
     
 function reset_config()
 {
-    SITE_TEMPLATE=/etc/apache2/sites-available;
-    
+    local site_template=/etc/apache2/sites-available;
     if [[ -f "${APACHE_MODS}/rewrite.conf" ]];then
         mv -f "${APACHE_MODS}/rewrite.conf" "${APACHE_MODS}/rewrite.conf.previous";
     fi;
@@ -45,11 +44,11 @@ function reset_config()
     fi;
     if [[ -f "${APACHE_SITES}/000-default.conf" ]];then
         mv -f "${APACHE_SITES}/000-default.conf" "${APACHE_SITES}/000-default.conf.previous";
-        cp -f "${SITE_TEMPLATE}/000-default.conf.dist" "${APACHE_SITES}/000-default.conf";
+        cp -f "${site_template}/000-default.conf.dist" "${APACHE_SITES}/000-default.conf";
     fi;
     if [[ -f "${APACHE_SITES}/default-ssl.conf" ]];then
         mv -f "${APACHE_SITES}/default-ssl.conf" "${APACHE_SITES}/default-ssl.conf.previous";
-        cp -f "${SITE_TEMPLATE}/default-ssl.conf.dist" "${APACHE_SITES}/default-ssl.conf";
+        cp -f "${site_template}/default-ssl.conf.dist" "${APACHE_SITES}/default-ssl.conf";
     fi;
 }
     
@@ -69,7 +68,7 @@ else
         echo "Ocie: Config: Rewriting all requests to: [ https ]";
         add_default;
     fi;
-    if [[ ! "${REWRITE_INDEX}" == "" ]];then
+    if [[ ! -z "${REWRITE_INDEX}" ]];then
         echo "Ocie: Config: Rewriting all requests to: [ ${REWRITE_INDEX} ]";
         add_framework;
     fi;
@@ -77,15 +76,15 @@ else
         echo "Ocie: Config: Adding CORS config for JSON to enabled site";
         add_cors;
     fi;
-    if [[ ! "${REWRITE_EXT}" == "" ]];then
-        if [[ ! "${REWRITE_INDEX}" = "" ]];then
+    if [[ ! -z "${REWRITE_EXT}" ]];then
+        if [[ ! -z "${REWRITE_INDEX}" ]];then
             echo "Ocie: Config: Cannot configure both [ REWRITE_INDEX ] and [ REWRITE_EXT ], using [ REWRITE_INDEX ], value ${REWRITE_INDEX}";
         else
             echo "Ocie: Config: Rewriting all requests with the following extensions: [ ${REWRITE_EXT} ]";
             add_extension;
         fi;
     fi;
-    if [[ ! "${REWRITE_EXCLUDE}" == "" ]];then
+    if [[ ! -z "${REWRITE_EXCLUDE}" ]];then
         echo "Ocie: Config: Ecluding the following pattern from rewrite: [ ${REWRITE_EXCLUDE} ]";
         add_exclude;
     fi;
@@ -94,10 +93,10 @@ fi;
 # Test config and print results
 # Tomcat sources this script, only print if apache
 if [[ ! "${APP_TYPE}" == "tomcat" ]];then
-    HTTPD_CFG=$(ociectl --test);
-    if [[ ! -z "${HTTPD_CFG}" ]];then
+    local httpd_cfg=$(ociectl --test);
+    if [[ ! -z "${httpd_cfg}" ]];then
         echo "Ocie: Config: Test FAILED, reverting changes";
-        echo "Ocie: Config: Result: ${HTTPD_CFG}";
+        echo "Ocie: Config: Result: ${httpd_cfg}";
         reset_config;
         exit 1;
     fi;

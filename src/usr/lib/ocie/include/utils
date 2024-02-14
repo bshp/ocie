@@ -24,13 +24,13 @@ function print_msg()
 # Get sha1 OR sha256 signature of directory/file, default: sha1
 function get_signature()
 {
-    object="$1";
-    option="${2,,}";
+    local object="$1";
+    local option="${2,,}";
     if [[ -z "${option}" ]];then
-        option='sha1';
+        local option='sha1';
     fi;
     if [[ ! "${option}" == "sha1" ]] && [[ ! "${option}" == "sha256" ]];then
-        option='sha1';
+        local option='sha1';
     fi;
     if [[ -d "${object}" ]];then
         echo "$(find ${object} -type f -print0 | xargs -0 sha1sum | sort | sha1sum | cut -f1 -d' ')";
