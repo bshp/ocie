@@ -22,18 +22,18 @@ function app_certs()
     
 function app_config()
 {
-    CUSTOM_CSS=${YOUTRACK_HOME}/conf/custom.css;
-    STATIC_DIR=${YOUTRACK_HOME}/apps/youtrack/web/static/simplified;
-    if [[ -f "${CUSTOM_CSS}" ]];then
+    local custom_css="${YOUTRACK_HOME}/conf/custom.css";
+    local static_dir="${YOUTRACK_HOME}/apps/youtrack/web/static/simplified";
+    if [[ -f "${custom_css}" ]];then
         #Get generated css
-        cd ${STATIC_DIR};
-        STYLE_CSS=$(find ~+ -name 'styles.*.css');
-        STYLE_LNK=$(basename "${STYLE_CSS}");
-        cp ${STYLE_CSS} ${YOUTRACK_HOME}/conf/;
+        cd ${static_dir};
+        local style_css=$(find ~+ -name 'styles.*.css');
+        local style_lnk=$(basename "${style_css}");
+        cp "${style_css}" "${YOUTRACK_HOME}/conf/";
         
         #Add custom css to styles
-        cat ${CUSTOM_CSS} >> ${YOUTRACK_HOME}/conf/${STYLE_LNK};
-        cp ${YOUTRACK_HOME}/conf/${STYLE_LNK} ${STATIC_DIR}/;
+        cat "${custom_css}" >> "${YOUTRACK_HOME}/conf/${style_lnk}";
+        cp "${YOUTRACK_HOME}/conf/${style_lnk}" "${static_dir}/";
         cd /;
     fi;
 }

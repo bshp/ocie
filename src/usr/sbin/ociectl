@@ -44,10 +44,10 @@ function check_volumes()
 {
     if [[ ! -z "${APP_VOLS}" ]];then
         echo "Ocie: Application has defined volumes";
-        unmapped="";
-        vols=$(cat /proc/mounts);
+        local unmapped="";
+        local vols=$(cat /proc/mounts);
         for vol in ${APP_VOLS//:/ };do
-            mounted=$(echo "$vols" | grep -Eo ".*${vol}.*$");
+            local mounted=$(echo "$vols" | grep -Eo ".*${vol}.*$");
             if [[ ! -z "${mounted}" ]];then
                 echo "Ocie: Application volume [ ${vol} ] is NOT mapped";
                 unmapped+="${vol}, ";

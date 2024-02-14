@@ -63,37 +63,37 @@ function get_environment()
     printf "%s" "$(</etc/environment)";
     echo
     echo "Ocie: Package Manifest";
-    . $OCIE_LIB/pkg --print;
+    . ${OCIE_LIB}/pkg --print;
 }
     
 function format_args()
 {
-    RESULT=$(echo "$1" | sed -e 's/ -/ --/g');
-    echo "$RESULT";
+    local result=$(echo "$1" | sed -e 's/ -/ --/g');
+    echo "${result}";
 }
     
-ENTRIES=();
-SILENT=0;
+local entries=();
+local silent=0;
     
 for i in "$@";do
     shift
     case "$i" in
         '--pkg') 
-            ENTRIES+=(["0"]="pkg $(format_args " $1")");;
+            entries+=(["0"]="pkg $(format_args " $1")");;
         '--cacerts') 
-            ENTRIES+=(["1"]="cacerts $(format_args " $1")");;
+            entries+=(["1"]="cacerts $(format_args " $1")");;
         '--dhparams') 
-            ENTRIES+=(["2"]="dhparams $(format_args " $1")");;
+            entries+=(["2"]="dhparams $(format_args " $1")");;
         '--keys') 
-            ENTRIES+=(["3"]="keys $(format_args " $1")");;
+            entries+=(["3"]="keys $(format_args " $1")");;
         '--timezone') 
-            ENTRIES+=(["4"]="timezone $(format_args " $1")");;
+            entries+=(["4"]="timezone $(format_args " $1")");;
         '--clean') 
-            ENTRIES+=(["5"]="clean $(format_args " $1")");;
+            entries+=(["5"]="clean $(format_args " $1")");;
         '--print') 
-            ENTRIES+=(["6"]="print");;
+            entries+=(["6"]="print");;
         '--quiet')
-            SILENT=1;;
+            silent=1;;
         '--help')
             show_help;;
         *);;
@@ -102,20 +102,20 @@ done;
     
 . ${OCIE_LIB}/include/utils;
     
-CMDS=$(<<< ${!ENTRIES[@]} tr ' ' '\n' | sort);
-for key in $CMDS;do
-    ENTRY="$(echo ${ENTRIES[$key]})";
-    CMD="$(echo ${ENTRY%% *})";
-    PARAMS="$(echo ${ENTRY#* })";
-    if [[ -f "${OCIE_LIB}/${CMD}" ]];then
-        #print_msg "Ocie: Executing [ $CMD ], with arguments: [ $PARAMS ]";
-        #. $OCIE_LIB/$CMD $PARAMS | print_msg
-        echo "Ocie: Executing [ $CMD ], with arguments: [ $PARAMS ]";
-        . $OCIE_LIB/$CMD $PARAMS
-    elif [[ "${CMD}" == "print" ]];then
+local cmds=$(<<< ${!entries[@]} tr ' ' '\n' | sort);
+for key in $cmds;do
+    local entry="$(echo ${entries[$key]})";
+    local cmd="$(echo ${entry%% *})";
+    local params="$(echo ${entry#* })";
+    if [[ -f "${OCIE_LIB}/${cmd}" ]];then
+        #print_msg "Ocie: Executing [ ${cmd} ], with arguments: [ ${params} ]";
+        #. ${OCIE_LIB}/${cmd} ${params} | print_msg
+        echo "Ocie: Executing [ $cmd ], with arguments: [ ${params} ]";
+        . ${OCIE_LIB}/${cmd} ${params}
+    elif [[ "${cmd}" == "print" ]];then
         get_environment;
     else
-        #print_msg "Ocie: Uknown option passed: [ $CMD ], use --help for more info";
-        echo "Ocie: Uknown option passed: [ $CMD ], use --help for more info";
+        #print_msg "Ocie: Uknown option passed: [ ${cmd} ], use --help for more info";
+        echo "Ocie: Uknown option passed: [ ${cmd} ], use --help for more info";
     fi;
 done;

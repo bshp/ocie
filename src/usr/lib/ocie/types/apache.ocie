@@ -18,10 +18,10 @@ function app_start()
     
 function app_test()
 {
-    CFG_TEST=$(apachectl configtest 2>&1);
-    CFG_PASS="Syntax OK";
-    CFG_RESULT=$(echo "$CFG_TEST" | grep "$CFG_PASS");
-    if [[ -z "$CFG_RESULT" ]];then
-        echo "$CFG_RESULT";
+    local cfg_test=$(apachectl configtest 2>&1);
+    local cfg_pass="Syntax OK";
+    local cfg_result=$(echo "${cfg_test}" | grep "${cfg_pass}");
+    if [[ -z "${cfg_result}" ]];then
+        echo "${cfg_result}";
     fi;
 }

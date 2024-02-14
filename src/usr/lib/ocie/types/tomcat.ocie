@@ -3,7 +3,7 @@
 function app_shutdown()
 {
     /usr/sbin/apachectl -k stop;
-    ${CATALINA_HOME}/bin/catalina.sh stop;
+    "${CATALINA_HOME}/bin/catalina.sh" stop;
 }
     
 function app_reload()
@@ -20,11 +20,11 @@ function app_start()
     
 function app_test()
 {
-    TC_TEST=$(/opt/tomcat/bin/catalina.sh configtest 2>&1);
-    CFG_TEST=$(echo "$TC_TEST" | grep 'Apache Tomcat Native' | sort -u);
-    CFG_PASS='INFO: Loaded( APR based)? Apache Tomcat Native library';
-    CFG_RESULT=$(echo "$CFG_TEST" | grep -E "$CFG_PASS");
-    if [[ -z "$CFG_RESULT" ]];then
-        echo "$TC_TEST";
+    local tc_test=$(/opt/tomcat/bin/catalina.sh configtest 2>&1);
+    local cfg_test=$(echo "$tc_test" | grep 'Apache Tomcat Native' | sort -u);
+    local cfg_pass='INFO: Loaded( APR based)? Apache Tomcat Native library';
+    local cfg_result=$(echo "$cfg_test" | grep -E "$cfg_pass");
+    if [[ -z "$cfg_result" ]];then
+        echo "$tc_test";
     fi;
 }
