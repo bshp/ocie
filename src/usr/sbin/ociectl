@@ -1,6 +1,7 @@
 #!/bin/bash
     
 # Custom config
+RUNAS="${APP_OWNER}";
 if [[ ! -z "${OCIE_CONFIG}" ]];then
     if [[ -d "${OCIE_CONFIG}" ]];then
         if [[ -f "${OCIE_CONFIG}/config.ocie" ]];then
@@ -66,7 +67,7 @@ function ocie_shutdown()
 {
     echo "Ocie: Recieved stop signal, attemtping to terminate application gracefully";
     app_shutdown;
-    echo "Ocie: Application stopped with exit code [ $? ], shutting down..";
+    echo "Ocie: Application stopped with exit code [ $? ], shutting down container..";
     exit 0;
 }
     
@@ -130,7 +131,6 @@ function ocie_start()
     ocie_keys;
     ocie_config;
     ocie_deploy;
-    RUNAS="${APP_OWNER}";
     if [[ "${APP_ENV}" == "prod" ]];then
         check_volumes;
     fi;
@@ -143,9 +143,23 @@ function ocie_start()
     else
         echo "Ocie: Application will run as [ ${RUNAS} ] OR you can set APP_OWNER to [ root ] and risk it for the biscuit";
     fi;
-    echo "Ocie: Initialization complete, starting container";
-    app_start &
-    wait
+    echo "Ocie: Initialization complete";
+    echo "Ocie: Application starting, please wait...";
+    local pid=$(app_start);
+    if [[ ! -z "$pid" ]];then
+        echo "Ocie: Application started, watching PID: [ $pid ]";
+        echo "Ocie: Press CTRL+C to stop";
+    else
+        echo "Ocie: Application did not return a PID";
+        ocie_shutdown;
+    fi;
+    while true;do
+        if [[ -z $(ps --no-headers -p $pid) ]];then
+            echo "Ocie: Application process has disappeared";
+            ocie_shutdown;
+        fi;
+        sleep 15;
+    done;
 }
     
 # Shutdown - SIGINT, SIGTERM, SIGWINCH

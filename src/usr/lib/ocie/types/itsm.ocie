@@ -2,17 +2,19 @@
     
 function app_shutdown()
 {
-    su jetbrains -c "${YOUTRACK_HOME}/bin/youtrack.sh stop";
+    ${YOUTRACK_HOME}/bin/youtrack.sh stop;
 }
     
 function app_reload()
 {
-    su jetbrains -c "${YOUTRACK_HOME}/bin/youtrack.sh restart";
+    ${YOUTRACK_HOME}/bin/youtrack.sh restart;
 }
     
 function app_start()
 {
-    su jetbrains -c "${YOUTRACK_HOME}/bin/youtrack.sh run $@";
+    su jetbrains -c "${YOUTRACK_HOME}/bin/youtrack.sh start $@";
+    sleep 5;
+    echo "$(cat ${YOUTRACK_PID} | sed 's/ //'))";
 }
     
 function app_certs()

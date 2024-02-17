@@ -15,6 +15,7 @@ function app_reload()
     /path/to/your/app --reload
 }
     
+# This must return, e.g echo the process id (PID)
 function app_start()
 {
    /path/to/your/app --start
