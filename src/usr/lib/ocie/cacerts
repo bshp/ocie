@@ -5,6 +5,7 @@ CA_PATH="${CA_PATH:-}";
 CA_UPDATE_AUTO="${CA_UPDATE_AUTO:-1}";
 CA_UPDATE_OS="${CA_UPDATE_OS:-0}";
 CA_UPDATE_JVM="${CA_UPDATE_JVM:-0}";
+JAVA_PATH="${JAVA_HOME:-/usr}";
     
 function show_help()
 {
@@ -19,53 +20,74 @@ function show_help()
    echo
    echo "Optional:";
    echo "    --os        Import into operating system store, /etc/ssl";
-   echo "    --jvm       Import into java store, cacerts";
+   echo "    --jvm       Import into java store, cacerts. Ensure JAVA_HOME is set, fallback to /usr/bin/java if available";
    echo "    --filter    Filter to find CA cert files by, default: *_CA.crt";
-}
-function auto_update()
-{
-    update_os;
-    if [[ ! -z "${JAVA_HOME}" ]];then
-        update_jvm;
-    fi;
-}
-    
-function update_jvm()
-{
-
-    for CA_CRT in /usr/local/share/ca-certificates/*.crt; do
-        CA_NAME=$(openssl x509 -noout -subject -nameopt multiline -in $CA_CRT | tr -d ' ' | grep -o 'commonName=.*' | cut -f2 -d'=');
-        CA_EXISTS=$(${JAVA_HOME}/bin/keytool -list -cacerts -storepass changeit -alias "$CA_NAME" | echo $?);
-        if [ "$CA_EXISTS" -eq 0 ];then
-            ${JAVA_HOME}/bin/keytool \
-            -import -trustcacerts -cacerts -storepass changeit -noprompt -alias "$CA_NAME" -file $CA_CRT >/dev/null 2>&1 \
-            | echo "Ocie: CA Import: Added certificate to cacert, $CA_CRT";
-        else 
-            echo "Ocie: CA Import: Certificate ${CA_NAME} already exists, skipping";
-        fi;
-    done;
-}
-    
-function update_os()
-{
-    certs=$(ls /usr/local/share/ca-certificates/*.crt 2> /dev/null | wc -l);
-    if [ "${certs}" -ne 0 ];then
-        update-ca-certificates &> /dev/null;
-    else
-        echo "Ocie: CA Import: No certificates were found to import";
-    fi;
 }
     
 function get_certs()
 {
     cd /usr/local/share/ca-certificates;
     if [[ "${PATH_TYPE}" == "url" ]];then
-        wget -q -r -nH -A ${CA_FILTER} "${IMPORT_PATH}";
+        wget -q -r -nH -A "${CA_FILTER}" "${IMPORT_PATH}";
     else 
         if [ -d "${IMPORT_PATH}" ];then
-            cp -R ${IMPORT_PATH}/${CA_FILTER} /usr/local/share/ca-certificates/;
+            cp -R "${IMPORT_PATH}/${CA_FILTER}" /usr/local/share/ca-certificates/;
         else
-            echo "Ocie: CA Import: Unable to read ${CA_PATH} or it is not a valid directory";
+            echo "Ocie: CA Import: Unable to read [ ${CA_PATH} ] or it is not a valid directory";
+        fi;
+    fi;
+}
+    
+function import_auto()
+{
+    import_os;
+    if [[ -f "${JAVA_PATH}/bin/keytool" ]];then
+        import_jvm;
+    fi;
+}
+    
+function import_jvm()
+{
+    for ca_crt in /usr/local/share/ca-certificates/*.crt; do
+        ca_name=$(openssl x509 -noout -subject -nameopt multiline -in $ca_crt | tr -d ' ' | grep -o 'commonName=.*' | cut -f2 -d'=');
+        ca_exists=$(${JAVA_PATH}/bin/keytool -list -cacerts -storepass changeit -alias "$ca_name" | echo $?);
+        if [ "$ca_exists" -eq 0 ];then
+            $JAVA_PATH/bin/keytool \
+            -import -trustcacerts -cacerts -storepass changeit -noprompt -alias "$ca_name" -file "$ca_crt" >/dev/null 2>&1 \
+            | echo "Ocie: CA Import: Added certificate to java trust store: [ $ca_crt ]";
+        else 
+            echo "Ocie: CA Import: Certificate [ ${ca_name} ] already exists, skipping";
+        fi;
+    done;
+}
+    
+function import_os()
+{
+    local certs=$(ls /usr/local/share/ca-certificates/*.crt 2> /dev/null | wc -l);
+    if [ "$certs" -ne 0 ];then
+        update-ca-certificates &> /dev/null;
+    else
+        echo "Ocie: CA Import: No certificates were found to import";
+    fi;
+}
+    
+function cert_import()
+{
+    if [[ "${CA_UPDATE_AUTO}" == 1 ]];then
+        echo "Ocie: CA Import: Auto Update is enabled";
+        import_auto;
+    else
+        if [[ "${CA_UPDATE_OS}" == 1 ]];then
+            echo "Ocie: CA Import: Updating OS CA Store";
+            import_os;
+        fi;
+        if [[ "${CA_UPDATE_JVM}" == 1 ]];then
+            if [[ -f "$JAVA_PATH/bin/keytool" ]];then
+                echo "Ocie: CA Import: Updating JVM CA Store";
+                import_jvm;
+            else
+                echo "Ocie: CA Import: Unable to locate a java binary, [ JAVA_HOME ] is not set or [ /usr/bin/java ] not found, skipping";
+            fi;
         fi;
     fi;
 }
@@ -98,27 +120,11 @@ if [[ ! -z "${CA_PATH}" ]];then
     IMPORT_PATH="${CA_PATH#*:}";
     PATH_TYPE="${CA_PATH%%:*}";
     if [[ ! "${PATH_TYPE}" == "file" ]] && [[ ! "${PATH_TYPE}" == "url" ]];then
-        echo "Ocie: CA Import: Unable to determine CA_PATH type, ${PATH_TYPE}, only file: or url: are valid";
+        echo "Ocie: CA Import: Unable to determine CA_PATH type, [ ${PATH_TYPE} ], only file: or url: are valid";
     else
         echo "Ocie: CA Import: Starting";
         get_certs;
-        if [[ ${CA_UPDATE_AUTO} == 1 ]];then
-            echo "Ocie: CA Import: Auto Update is enabled";
-            auto_update;
-        else
-            if [[ ${CA_UPDATE_OS} == 1 ]];then
-                echo "Ocie: CA Import: Updating OS CA Store";
-                update_os;
-            fi;
-            if [[ ${CA_UPDATE_JVM} == 1 ]];then
-                if [[ ! -z "${JAVA_HOME}" ]];then
-                    echo "Ocie: CA Import: Updating JVM CA Store";
-                    update_jvm;
-                else
-                    echo "Ocie: CA Import: JAVA_HOME is undefined, skipping";
-                fi;
-            fi;
-        fi;
+        cert_import;
         cleanup;
         echo "Ocie: CA Import: Finished";
     fi;
