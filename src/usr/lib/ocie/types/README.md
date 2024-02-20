@@ -15,7 +15,7 @@ function app_reload()
     /path/to/your/app --reload
 }
     
-# This must return, e.g echo the process id (PID)
+# This must return, e.g echo the process id (PID) if WATCHER_ENABLED=1
 function app_start()
 {
    /path/to/your/app --start

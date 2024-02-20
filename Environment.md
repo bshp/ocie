@@ -54,6 +54,34 @@
         }
       }
     },
+    "WATCHER_ENABLED": {
+      "type": "system",
+      "default": "1",
+      "description": "Start application in the background and monitor PID for exit",
+      "containers": "all",
+      "usage": {
+        "self": {
+          "required": true
+        },
+        "children": {
+          "required": true
+        }
+      }
+    },
+    "WATCHER_INTERVAL": {
+      "type": "system",
+      "default": "30",
+      "description": "Time in seconds between PID checks",
+      "containers": "all",
+      "usage": {
+        "self": {
+          "required": true
+        },
+        "children": {
+          "required": true
+        }
+      }
+    },
     "OS_BASE": {
       "type": "system",
       "default": "${OS_BASE}",
