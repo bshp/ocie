@@ -14,7 +14,7 @@ function app_start()
 {
     su jetbrains -c "${APP_HOME}/bin/youtrack.sh start $@ >/dev/null 2&>1";
     sleep 15;
-    echo "$(cat ${YOUTRACK_PID} | sed 's/ //')";
+    echo "$(cat ${APP_DATA}/logs/youtrack.pid | sed 's/ //')";
 }
     
 function app_certs()
