@@ -2,19 +2,19 @@
     
 function app_shutdown()
 {
-    ${YOUTRACK_HOME}/bin/youtrack.sh stop;
+    ${APP_HOME}/bin/youtrack.sh stop;
 }
     
 function app_reload()
 {
-    ${YOUTRACK_HOME}/bin/youtrack.sh restart;
+    ${APP_HOME}/bin/youtrack.sh restart;
 }
     
 function app_start()
 {
-    su jetbrains -c "${YOUTRACK_HOME}/bin/youtrack.sh start $@";
-    sleep 5;
-    echo "$(cat ${YOUTRACK_PID} | sed 's/ //'))";
+    su jetbrains -c "${APP_HOME}/bin/youtrack.sh start $@ >/dev/null 2&>1";
+    sleep 15;
+    echo "$(cat ${YOUTRACK_PID} | sed 's/ //')";
 }
     
 function app_certs()
@@ -24,18 +24,18 @@ function app_certs()
     
 function app_config()
 {
-    local custom_css="${YOUTRACK_HOME}/conf/custom.css";
-    local static_dir="${YOUTRACK_HOME}/apps/youtrack/web/static/simplified";
+    local custom_css="${APP_DATA}/conf/custom.css";
+    local static_dir="${APP_HOME}/apps/youtrack/web/static/simplified";
     if [[ -f "${custom_css}" ]];then
         #Get generated css
         cd ${static_dir};
         local style_css=$(find ~+ -name 'styles.*.css');
         local style_lnk=$(basename "${style_css}");
-        cp "${style_css}" "${YOUTRACK_HOME}/conf/";
+        cp "${style_css}" "${APP_DATA}/conf/";
         
         #Add custom css to styles
-        cat "${custom_css}" >> "${YOUTRACK_HOME}/conf/${style_lnk}";
-        cp "${YOUTRACK_HOME}/conf/${style_lnk}" "${static_dir}/";
+        cat "${custom_css}" >> "${APP_DATA}/conf/${style_lnk}";
+        cp "${APP_DATA}/conf/${style_lnk}" "${static_dir}/";
         cd /;
     fi;
 }
