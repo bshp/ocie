@@ -51,7 +51,6 @@ function check_volumes()
         for i in ${APP_VOLS//:/ };do
             if [[ -z "$(echo $vols | grep -o '$i')" ]];then
                 unmapped+="$i, ";
-                echo "Ocie: Application volume [ $i ] is NOT mapped";
             fi;
         done;
         if [[ ! -z "$unmapped" ]];then
