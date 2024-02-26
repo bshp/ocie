@@ -2,18 +2,18 @@
     
 function app_shutdown()
 {
-    /usr/sbin/apachectl -k stop;
+    /usr/sbin/apachectl -k stop >/dev/null 2>&1;
 }
     
 function app_reload()
 {
 
-    /usr/sbin/apachectl -k graceful;
+    /usr/sbin/apachectl -k graceful >/dev/null 2>&1;
 }
     
 function app_start()
 {
-    /usr/sbin/apachectl -k start;
+    /usr/sbin/apachectl -k start >/dev/null 2>&1;
     sleep 5;
     echo $(cat ${APACHE_PID});
 }
