@@ -1,6 +1,6 @@
 #!/bin/bash
     
-. ${OCIE_LIB}/include/config/apache;
+. ${OCIE_LIB}/include/apache;
     
 # Tomcat specific
 app_proxies="$(echo ${VADC_IP_ADDRESS// /|} | sed 's/\./\\./g' | sed 's|\/|\\/|g')";
