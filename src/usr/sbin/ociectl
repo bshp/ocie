@@ -1,28 +1,18 @@
 #!/bin/bash
     
-# Custom config
-RUNAS="${APP_OWNER}";
-    
-if [[ ! -z "${OCIE_CONFIG}" ]];then
-    if [[ -d "${OCIE_CONFIG}" ]];then
-        if [[ -f "${OCIE_CONFIG}/config.ocie" ]];then
-            . ${OCIE_CONFIG}/config.ocie;
-        else
-            echo "Ocie: Application config [ config.ocie ] not found in path [ ${OCIE_CONFIG} ]";
-        fi;
-    else
-        echo "Ocie: Unable to load config, [ ${OCIE_CONFIG} ] is not a directory or not readable";
-    fi;
-else
-    # Default config
-    if [[ -f "${OCIE_LIB}/types/${APP_TYPE}.ocie" ]];then
-        . ${OCIE_LIB}/types/${APP_TYPE}.ocie;
-    else
-        echo "Ocie: Application config not found in any available path, type: [ config.ocie ]";
-        echo "Ocie: Create an 'config.ocie' in your application, set the environment OCIE_CONFIG, e.g OCIE_CONFIG=/etc/myapp/path_to_definition";
-        exit 1;
-    fi;
+# Config
+if [[ -z "${OCIE_CONFIG}" ]];then
+    echo "Ocie: Environment variable [ OCIE_CONFIG ] is not set";
+    echo "Ocie: Create an 'config.ocie' in your application, set the environment OCIE_CONFIG, e.g OCIE_CONFIG=/etc/myapp/path_to_definition";
+    exit 1;
 fi;
+if [[ ! -f "${OCIE_CONFIG}/config.ocie" ]];then
+    echo "Ocie: Unable to load config, [ ${OCIE_CONFIG} ] is not a directory or [ ${OCIE_CONFIG}/config.ocie ] is not readable";
+    exit 1;
+fi;
+    
+# Include app config
+. ${OCIE_CONFIG}/config.ocie;
     
 function show_help()
 {
@@ -132,16 +122,6 @@ function ocie_start()
     if [[ "${APP_ENV}" == "prod" ]];then
         check_volumes;
     fi;
-    # DISA STIG V-222986, Tomcat owner is root but runas is tomcat
-    if [[ "${APP_TYPE}" == "tomcat" ]];then
-        RUNAS="tomcat";
-    fi;
-    if [[ "${RUNAS}" == "root" ]];then
-        echo "Ocie: Application is set to run as [ root ], set APP_OWNER to change the account";
-    else
-        echo "Ocie: Application will run as [ ${RUNAS} ] OR you can set APP_OWNER to [ root ] and risk it for the biscuit";
-    fi;
-    export RUNAS="$RUNAS";
     echo "Ocie: Initialization complete";
     echo "Ocie: Application starting, please wait...";
     if [[ "${WATCHER_ENABLED}" == "1" ]];then
