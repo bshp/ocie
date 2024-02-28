@@ -35,7 +35,6 @@ function show_help()
 function check_volumes()
 {
     if [[ ! -z "${APP_VOLS}" ]];then
-        echo "Ocie: Application has defined volumes";
         local unmapped="";
         local vols=$(cat /proc/mounts);
         for i in ${APP_VOLS//:/ };do
@@ -45,7 +44,7 @@ function check_volumes()
         done;
         if [[ ! -z "$unmapped" ]];then
             echo "Ocie: Application needs to store persistant data and the volume(s) listed are not mapped:";
-            echo "  Unmapped Volumes: [ ${unmapped%, } ]";
+            echo "  [ ${unmapped%, } ]";
             echo "Ocie: Each volume should be mapped at runtime , e.g --volume my_vol:/example/path";
             echo "Ocie: If this is a development environment, set --env|-e APP_ENV='dev' to mute this warning";
         fi;
