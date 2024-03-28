@@ -114,6 +114,7 @@ function ocie_reload()
     
 function ocie_start()
 {
+    echo "Ocie: Initializing container";
     ocie_certs;
     ocie_keys;
     ocie_config;
@@ -122,7 +123,7 @@ function ocie_start()
         check_volumes;
     fi;
     echo "Ocie: Initialization complete";
-    echo "Ocie: Application starting, please wait...";
+    echo "Ocie: Starting application, please wait...";
     if [[ "${WATCHER_ENABLED}" == "1" ]];then
         local pid=$(app_start);
         if [[ ! -z "$pid" ]];then
