@@ -29,14 +29,14 @@ jobs:
         docker tag bshp/ocie:latest bshp/ocie:${{env.STABLE_CHANNEL}}
         docker push bshp/ocie:latest
         docker push bshp/ocie:${{env.STABLE_CHANNEL}}
-    - name: Build 24.04
-      run: |
-        docker build . --pull --build-arg OS_VERSION=${{env.BETA_CHANNEL}} --tag bshp/ocie:beta --no-cache
-    - name: Push 24.04
-      run: |
-        docker tag bshp/ocie:beta bshp/ocie:${{env.BETA_CHANNEL}}
-        docker push bshp/ocie:beta
-        docker push bshp/ocie:${{env.BETA_CHANNEL}}
+   # - name: Build 24.04
+   #   run: |
+   #     docker build . --pull --build-arg OS_VERSION=${{env.BETA_CHANNEL}} --tag bshp/ocie:beta --no-cache
+   # - name: Push 24.04
+   #   run: |
+   #     docker tag bshp/ocie:beta bshp/ocie:${{env.BETA_CHANNEL}}
+   #     docker push bshp/ocie:beta
+   #     docker push bshp/ocie:${{env.BETA_CHANNEL}}
     - name: Dispatch Events
       run: |
         inheritees="apache2,ezproxy,itsm,mantis,unifi";
