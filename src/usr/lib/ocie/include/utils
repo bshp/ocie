@@ -37,6 +37,6 @@ function get_signature()
     elif [[ -f "${object}" ]];then
         echo "$(${option}sum ${object} | cut -f1 -d' ')";
     else
-        echo "0";
+        echo '';
     fi;
 }

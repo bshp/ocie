@@ -2,66 +2,114 @@
     
 . ${OCIE_LIB}/include/utils
     
-function deploy_app()
+# Globals
+deploy_local="";
+deploy_latest="";
+current_sig="";
+update_sig="";
+    
+function check_type()
 {
-    if [[ -d "${deploy_latest}" ]];then
-        cp -R ${deploy_latest}/* ${APP_HOME};
+    if [[ "${APP_TYPE}" == "apache" ]] || [[ "${APP_TYPE}" == "tomcat" ]];then
+        set_paths;
     else
-        cp -R ${deploy_latest} ${APP_HOME}/;
+        echo "Ocie: App Deploy: Only [ apache | tomcat ] is supported for deployment, set APP_DEPLOY=0 to bypass, shutting down..";
+        exit 1;
     fi;
 }
     
-function update_app()
+function check_updates()
 {
-    if [[ "${local_sig}" == "${update_sig}" ]];then
+    echo "Ocie: App Deploy: Local Signature: [ ${current_sig} ], Latest Signature: [ ${update_sig} ]";
+    if [[ "${current_sig}" == "${update_sig}" ]];then
         echo "Ocie: App Deploy: Application is up-to-date";
     else
-        echo "Ocie: App Deploy: Update is needed";
-        deploy_app;
+        deploy_update;
     fi;
-    deployed=$(get_signature "${deploy_local}");
-    if [[ "${deployed}" == "${update_sig}" ]];then
-        echo "Ocie: App Deploy: Application updated, signature: [ ${deployed}} ]";
+    if [[ "${current_sig}" == "${update_sig}" ]];then
+        echo "Ocie: App Deploy: Application updated, signature: [ ${current_sig} ]";
     else
         echo "Ocie: App Deploy: Application could not be updated, check logs for more details";
     fi;
 }
     
-if [[ "${APP_TYPE}" == "" ]];then
-    echo "Ocie: App Deploy: Required APP_TYPE not defined, set APP_TYPE to one of [ apache | tomcat ]";
-    exit 22;
-else
+function deploy_update()
+{
+    if [[ ! -d "${APP_DATA}" ]]; then
+        echo "Ocie: App Deploy: Data directory for application does not exist, creating ${APP_DATA}";
+        install -d -m 0770 -o "${APP_OWNER}" -g "${APP_GROUP}" "${APP_DATA}";
+    fi;
+    if [[ -d "${deploy_latest}" ]];then
+        cp -R "${deploy_latest}"/* "${APP_HOME}" >/dev/null 2>&1;
+    else
+        cp -R "${deploy_latest}" "${APP_HOME}"/ >/dev/null 2>&1;
+    fi;
+    set_current_sig;
+}
+    
+function get_status()
+{
+    if [[ -z "${current_sig}" ]] && [[ ! -z "${update_sig}" ]];then
+        echo 101;
+        return;
+    fi;
+    if [[ ! -z "${current_sig}" ]] && [[ -z "${update_sig}" ]];then
+        if [[ "${APP_UPDATE_STRICT}" == 1 ]];then
+            echo "Ocie: App Deploy: Application IS DEPLOYED, Update NOT FOUND in path [ ${APP_UPDATE_PATH} ]";
+            echo "Ocie: App Deploy: Strict update checks are ENABLED, terminating application";
+            exit 2;
+        fi;
+        echo 102;
+        return;
+    fi;
+    echo 2;
+    return;
+}
+
+function set_paths()
+{
     deploy_local="${APP_HOME}";
     deploy_latest="${APP_UPDATE_PATH}/${APP_NAME}";
     if [[ "${APP_TYPE}" == "tomcat" ]];then
         deploy_local="${APP_HOME}/${APP_NAME}.war";
         deploy_latest="${APP_UPDATE_PATH}/${APP_NAME}.war";
     fi;
-    echo "Ocie: App Deploy: Deployment type is [ ${APP_TYPE} ]";
-    if [[ ! -d "${APP_DATA}" ]]; then
-        echo "Ocie: App Deploy: Data directory for application does not exist, creating ${APP_DATA}";
-        install -d -m 0770 -o "${APP_OWNER}" -g "${APP_GROUP}" "${APP_DATA}";
-    fi;
-    # Deploy application
-    local_sig=$(get_signature "${deploy_local}");
-    update_sig=$(get_signature "${deploy_latest}");
-    echo "Ocie: App Deploy: Application configured using [ data: ${APP_DATA}, owner: ${APP_OWNER}, group: ${APP_GROUP} ]";
-    if [[ "${local_sig}" == "0" ]] && [[ "${update_sig}" == "0" ]];then
-        echo "Ocie: App Deploy: Application IS NOT DEPLOYED, Application NOT FOUND in path [ ${APP_UPDATE_PATH} ]";
+}
+    
+function set_current_sig()
+{
+    current_sig=$(get_signature ${deploy_local});
+}
+    
+function set_update_sig()
+{
+    update_sig=$(get_signature ${deploy_latest});
+}
+    
+function deploy_main()
+{
+    check_type;
+    set_current_sig;
+    set_update_sig;
+    local can_deploy=$(get_status);
+    if [[ "$can_deploy" == 2 ]];then
+        echo "Ocie: App Deploy: Application is NOT DEPLOYED and NOT FOUND in path [ ${APP_UPDATE_PATH} ]";
         exit 2;
-    elif [[ "${local_sig}" == "0" ]] && [[ "${update_sig}" != "0" ]];then
-        echo "Ocie: App Deploy: Application IS NOT DEPLOYED, Application FOUND in path [ ${APP_UPDATE_PATH} ]";
-        deploy_app;
-        echo "Ocie: App Deploy: Application deployed, signature: [ $(get_signature ${deploy_local}) ]";
-    elif [[ "${local_sig}" != "0" ]] && [[ "${update_sig}" == "0" ]];then
-        echo "Ocie: App Updater: Application IS DEPLOYED, Update NOT FOUND in path [ ${APP_UPDATE_PATH} ]";
-        if [[ "${APP_UPDATE_STRICT}" == 1 ]];then
-            echo "Ocie: App Deploy: Strict update checks are ENABLED, terminating application";
-            exit 2;
-        fi;
-    else
-        echo "Ocie: App Deploy: Checking if update is needed";
-        echo "Ocie: App Deploy: Local Signature: [ ${local_sig} ], Latest Signature: [ ${update_sig} ]";
-        update_app;
     fi;
-fi;
+    echo "Ocie: App Deploy: Type [ ${APP_TYPE} ]";
+    echo "Ocie: App Deploy: Configuration [ data: ${APP_DATA}, owner: ${APP_OWNER}, group: ${APP_GROUP} ]";
+    if [[ "$can_deploy" == 101 ]];then
+        echo "Ocie: App Deploy: Application is NOT DEPLOYED and will be deployed from [ ${APP_UPDATE_PATH} ]";
+        deploy_update;
+        echo "Ocie: App Deploy: Application deployed, signature: [ $(get_signature ${deploy_local}) ]";
+    fi;
+    if [[ "$can_deploy" == 102 ]];then
+        echo "Ocie: App Deploy: Checking if application update is needed";
+        check_updates;
+    fi;
+}
+    
+# Deploy application
+deploy_main;
+
+unset deploy_local deploy_latest current_sig update_sig;
